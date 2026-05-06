@@ -77,26 +77,34 @@ st.markdown(f"""
 # ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
-    formatted_text = text.replace('\n', '<br>')
+    # \n을 <br>로 정확히 변환
+    formatted_text = text.replace("\n", "<br>")
     return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{formatted_text}</div></div>'
 
 def get_user_html(text):
-    formatted_text = text.replace('\n', '<br>')
+    formatted_text = text.replace("\n", "<br>")
     return f'<div class="user-container"><div class="user-bubble">{formatted_text}</div><div class="user-avatar">👤</div></div>'
 
 def save_log_to_gsheets(log_entry):
-    """구글 시트에 실시간으로 로그 한 줄 추가 (에러 진단 기능 포함)"""
+    """구글 시트에 실시간으로 로그 한 줄 추가"""
     try:
-        # ttl=0을 설정하여 캐시 없이 실시간으로 시트를 읽어옵니다.
-        existing_df = conn.read(worksheet="Sheet1", ttl=0)
+        # 1. 기존 데이터 읽기
+        df = conn.read(worksheet="Sheet1", ttl=0)
+        
+        # 2. 새 로그 데이터프레임 생성
         new_log_df = pd.DataFrame([log_entry])
-        updated_df = pd.concat([existing_df, new_log_df], ignore_index=True)
+        
+        # 3. 데이터 합치기 (기존 데이터가 비어있으면 새 데이터만 사용)
+        if df is not None and not df.empty:
+            updated_df = pd.concat([df, new_log_df], ignore_index=True)
+        else:
+            updated_df = new_log_df
+            
+        # 4. 시트 업데이트
         conn.update(worksheet="Sheet1", data=updated_df)
         st.toast("데이터가 구글 시트에 기록되었습니다! ✅") 
     except Exception as e:
-        # 저장이 실패하면 화면에 빨간색 에러 박스를 띄웁니다.
-        st.error(f"⚠️ 구글 시트 저장 오류 발생: {e}")
-        st.info("팁: 구글 시트의 탭 이름이 'Sheet1'인지, 공유 설정이 '편집자'인지 확인하세요.")
+        st.error(f"⚠️ 구글 시트 저장 오류: {e}")
 
 # ==========================================
 # 5. 트리거 및 시나리오 설정
