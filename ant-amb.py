@@ -7,25 +7,24 @@ import pandas as pd
 import uuid
 
 # ==========================================
-# 🔑 1. API 및 구글 시트 연결 설정 (Secrets 사용)
+# 🔑 1. API 및 구글 시트 연결 설정
 # ==========================================
-# Streamlit Secrets에서 API 키를 안전하게 불러옵니다.
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 except:
     st.error("Streamlit Secrets에 GEMINI_API_KEY가 설정되지 않았습니다.")
 
-# 구글 시트 연결 초기화 (Secrets의 [connections.gsheets] 설정을 사용함)
+# 구글 시트 연결 초기화
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # ==========================================
 # 2. 세션 상태(Session State) 초기화
 # ==========================================
 if "user_id" not in st.session_state:
-    st.session_state.user_id = str(uuid.uuid4())[:8] # 피험자 고유 ID
+    st.session_state.user_id = str(uuid.uuid4())[:8]
 
 if "scenario_stage" not in st.session_state:
-    st.session_state.scenario_stage = 0 # 0:대기, 1~3:시나리오, 4:종료
+    st.session_state.scenario_stage = 0
 
 if "generating" not in st.session_state:
     st.session_state.generating = False
@@ -36,7 +35,7 @@ if "messages" not in st.session_state:
     ]
 
 # ==========================================
-# 3. 🎨 커스텀 UI 디자인 (스크린샷 UI 재현)
+# 3. 🎨 커스텀 UI 디자인 (CSS)
 # ==========================================
 st.set_page_config(page_title="지현 (Ji-hyun)", page_icon="🎓", layout="centered")
 
@@ -45,11 +44,7 @@ st.markdown("""
     .stApp { background-color: #ffffff; }
     .block-container { padding-top: 2rem !important; max-width: 700px; }
     header {visibility: hidden;}
-    
-    /* 챗봇 이름 */
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 5px; margin-left: 55px; font-weight: bold; }
-    
-    /* 챗봇 말풍선 (왼쪽) */
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
     .bot-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 10px; border: 1px solid #eee; }
     .bot-bubble { 
@@ -57,8 +52,6 @@ st.markdown("""
         border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; 
         max-width: 80%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
     }
-    
-    /* 사용자 말풍선 (오른쪽) */
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { 
         background-color: #2c3e50; color: #ffffff; padding: 12px 16px; 
@@ -69,13 +62,10 @@ st.markdown("""
         width: 40px; height: 40px; border-radius: 50%; background-color: #555; 
         display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; 
     }
-    
-    /* 입력창 디자인 */
     [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# 상단 헤더
 st.markdown(f"""
 <div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;">
     <span style="font-weight: bold; color: #333;">🎓 지현 (Ji-hyun) | ID: {st.session_state.user_id}</span>
@@ -95,16 +85,18 @@ def get_user_html(text):
     return f'<div class="user-container"><div class="user-bubble">{formatted_text}</div><div class="user-avatar">👤</div></div>'
 
 def save_log_to_gsheets(log_entry):
-    """구글 시트에 실시간으로 로그 한 줄 추가"""
+    """구글 시트에 실시간으로 로그 한 줄 추가 (에러 진단 기능 포함)"""
     try:
-        # 시트의 기존 데이터를 읽어오고 새 데이터를 붙여 업데이트합니다.
+        # ttl=0을 설정하여 캐시 없이 실시간으로 시트를 읽어옵니다.
         existing_df = conn.read(worksheet="Sheet1", ttl=0)
         new_log_df = pd.DataFrame([log_entry])
         updated_df = pd.concat([existing_df, new_log_df], ignore_index=True)
         conn.update(worksheet="Sheet1", data=updated_df)
+        st.toast("데이터가 구글 시트에 기록되었습니다! ✅") 
     except Exception as e:
-        # 실험 중 에러 메시지가 피험자에게 방해되지 않도록 조용히 처리하거나 로그만 남깁니다.
-        pass
+        # 저장이 실패하면 화면에 빨간색 에러 박스를 띄웁니다.
+        st.error(f"⚠️ 구글 시트 저장 오류 발생: {e}")
+        st.info("팁: 구글 시트의 탭 이름이 'Sheet1'인지, 공유 설정이 '편집자'인지 확인하세요.")
 
 # ==========================================
 # 5. 트리거 및 시나리오 설정
@@ -121,22 +113,18 @@ SCENARIO_ANSWERS = {
 # ==========================================
 # 6. 대화 출력 및 입력 처리
 # ==========================================
-# 이전 대화 기록 출력
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else:
         st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
-# 사용자 입력창
 prompt = st.chat_input("Text", disabled=st.session_state.generating)
 
 if prompt:
-    # 사용자 메시지 화면 출력 및 저장
     st.markdown(get_user_html(prompt), unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    # 트리거 감지 및 단계 관리
     res_type = "FREE_CHAT"
     if st.session_state.scenario_stage == 0:
         clean_text = re.sub(r'[^가-힣a-zA-Z0-9]', '', prompt)
@@ -154,21 +142,17 @@ if prompt:
     st.session_state.generating = True
     st.rerun()
 
-# 답변 생성 및 타이핑 효과
 if st.session_state.generating:
     placeholder = st.empty()
     full_response = ""
     
     try:
-        # 시나리오 답변 (1~3단계)
         if 1 <= st.session_state.scenario_stage <= 3:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             for char in target_text:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
-        
-        # 일반 AI 답변
         else:
             model = genai.GenerativeModel('gemini-flash-lite-latest', 
                 system_instruction="너는 대학생의 과제를 도와주는 다정한 학습 메이트 '지현'이야. 친절한 존댓말과 이모티콘을 사용해.")
@@ -179,7 +163,7 @@ if st.session_state.generating:
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                     time.sleep(0.005)
 
-        # 실시간 로그 데이터 생성 및 구글 시트 저장
+        # 로그 데이터 생성
         log_data = {
             "user_id": st.session_state.user_id,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -189,9 +173,10 @@ if st.session_state.generating:
             "response_type": st.session_state.current_res_type,
             "scenario_stage": st.session_state.scenario_stage
         }
+        
+        # 구글 시트 저장 실행
         save_log_to_gsheets(log_data)
 
-        # 메시지 저장 및 상태 초기화
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
         st.rerun()
