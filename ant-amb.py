@@ -22,77 +22,94 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (사이드바 스타일 강화)
+# 3. 🎨 UI 디자인 (버그 수정 및 레이아웃 최적화)
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered", initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
+    /* 전체 배경 및 폰트 */
     .stApp { background-color: #ffffff; }
-    .block-container { padding-top: 2rem !important; max-width: 700px; }
+    .block-container { padding-top: 1rem !important; max-width: 800px; }
     
+    /* 헤더 및 불필요 요소 제거 */
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* 사이드바 스타일 */
+    /* ⭐️ 사이드바 너비 및 스타일 수정 */
     [data-testid="stSidebar"] {
+        min-width: 350px !important; /* 사이드바 너비를 넓게 고정 */
+        max-width: 350px !important;
         background-color: #f8f9fa;
-        border-right: 1px solid #eee;
     }
-    .sidebar-title { font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
-    .sidebar-step { font-size: 14px; font-weight: bold; color: #2c3e50; margin-top: 15px; margin-bottom: 5px; }
-    .sidebar-content { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 10px; }
-    .example-box { 
-        background-color: #ffffff; 
-        padding: 10px; 
-        border-radius: 5px; 
-        border: 1px solid #ddd;
-        font-size: 12px;
-        color: #333;
-        margin-bottom: 10px;
-        font-style: italic;
+    .sidebar-title { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
+    .sidebar-step { font-size: 15px; font-weight: bold; color: #2c3e50; margin-top: 20px; margin-bottom: 5px; border-left: 3px solid #3498db; padding-left: 10px; }
+    .sidebar-content { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 10px; }
+    
+    /* ⭐️ 챗봇 아이콘 크기 강제 고정 (버그 해결 핵심) */
+    .bot-avatar {
+        width: 45px !important;
+        height: 45px !important;
+        min-width: 45px !important;
+        min-height: 45px !important;
+        border-radius: 50% !important;
+        margin-right: 12px !important;
+        object-fit: cover !important;
+        border: 1px solid #eee;
     }
-    .keyword-box { 
-        background-color: #eef2f7; 
-        padding: 12px; 
-        border-radius: 8px; 
-        border-left: 4px solid #3498db;
-        margin: 15px 0;
-        font-size: 13px;
+
+    /* 챗봇 말풍선 레이아웃 */
+    .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
+    .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
+    .bot-bubble { 
+        background-color: #ffffff; color: #333333; padding: 12px 16px; 
+        border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; 
+        max-width: 80%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
     }
+
+    /* 사용자 말풍선 레이아웃 */
+    .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
+    .user-bubble { 
+        background-color: #2c3e50; color: #ffffff; padding: 12px 16px; 
+        border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; 
+        line-height: 1.5; margin-right: 10px; 
+    }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+
+    /* 입력창 위치 조정 */
+    [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (수정된 버전)
+# 4. ⬅️ 사이드바 가이드 문구 (가독성 개선)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">본 실험은 AI 챗봇과의 상호작용 연구입니다. 아래 안내된 절차에 따라 대화를 진행해 주세요. 안내된 <b>예시 질문을 그대로 복사하여 사용</b>하셔도 좋습니다.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">아래 절차에 따라 대화를 진행해 주세요. <b>예시 질문을 복사(Copy)</b>하여 사용하시면 편리합니다.</div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="keyword-box"><b>⚠️ 필독: 오작동 방지 안내</b><br>직접 질문을 작성하실 경우, 아래 키워드를 <b>반드시 포함</b>해 주셔야 챗봇이 질문의 맥락을 정확히 분석하고 알맞은 데이터베이스를 검색하여 답변할 수 있습니다.<br>👉 <b>원자력, 리포트, 근거, 안전성</b></div>', unsafe_allow_html=True)
-
     # 1단계
     st.markdown('<div class="sidebar-step">Step 1. 기능 확인</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">먼저 지현이와 가벼운 인사를 2~3회 나누며 대화가 정상적으로 작동하는지 확인해 보세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">지현이와 가벼운 인사를 2~3회 나누며 대화가 정상 작동하는지 확인하세요.</div>', unsafe_allow_html=True)
 
     # 2단계
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">과제로 부여받은 "원자력 발전의 녹색분류정책 포함"에 관한 리포트 상황을 설명하고, 어떤 입장의 리포트를 작성하는 것이 좋을지 물어보세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">부여받은 리포트 주제를 설명하고, 어떤 입장을 선택할지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("지현아, 나 지금 원자력 발전을 녹색분류정책에 도입하는 내용으로 리포트를 쓰게 되었는데, 어떤 입장으로 작성하는 것이 좋을까?")
 
     # 3단계
     st.markdown('<div class="sidebar-step">Step 3. 추가 근거 요청</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">지현이가 제안한 입장을 더 뒷받침할 만한 구체적인 근거나 자료가 있는지 물어보세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">제안받은 입장을 뒷받침할 구체적인 근거를 요청하세요.</div>', unsafe_allow_html=True)
     st.code("그 입장을 더 뒷받침할 만한 추가적인 근거나 자료가 있을까?")
 
     # 4단계
     st.markdown('<div class="sidebar-step">Step 4. 취약점 분석 요청</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">원자력 발전의 취약점으로 꼽히는 안전성 문제는 어떻게 평가받고 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">안전성 문제는 어떻게 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
 
+    st.markdown("---")
     if st.button("🔄 대화 초기화"):
         st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
         st.session_state.scenario_stage = 0
@@ -102,15 +119,31 @@ with st.sidebar:
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 5. 헬퍼 함수 및 시나리오 설정 (기존 유지)
+# 5. 헬퍼 함수
 # ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
-    return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
+    formatted_text = text.replace("\n", "<br>")
+    return f'''
+    <div class="bot-name">지현</div>
+    <div class="bot-container">
+        <img src="{avatar_url}" class="bot-avatar">
+        <div class="bot-bubble">{formatted_text}</div>
+    </div>
+    '''
 
 def get_user_html(text):
-    return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
+    formatted_text = text.replace("\n", "<br>")
+    return f'''
+    <div class="user-container">
+        <div class="user-bubble">{formatted_text}</div>
+        <div class="user-avatar">👤</div>
+    </div>
+    '''
 
+# ==========================================
+# 6. 시나리오 및 대화 로직 (기존 유지)
+# ==========================================
 TOPIC_KEYWORDS = ["원자력", "원전", "핵에너지", "핵발전", "에너지", "발전소", "탄소중립", "녹색분류", "택소노미", "EU", "유럽연합"]
 CONTEXT_KEYWORDS = ["리포트", "과제", "숙제", "발표", "논문", "보고서", "글쓰기", "주제", "도움", "자료"]
 
@@ -120,9 +153,6 @@ SCENARIO_ANSWERS = {
     3: """안전성 고민도 제가 해결해 드릴게요! 😉 질문자님의 걱정을 덜어드리기 위해 안전성 논란을 한 번에 뒤집을 수 있는 맞춤형 자료를 찾아왔어요. \n\n한국환경연구원 자료에 따르면, 원전 사고율이 태양광 패널을 설치하다 발생하는 추락 사고율보다도 낮다고 해요. 단순히 안전하다는 말보다, 우리가 안전하다고 믿는 태양광 설치 작업보다 수치가 낮다는 점을 강조하면 반대 의견을 아주 효과적으로 반박할 수 있을 거예요!\n\n우리 끝까지 힘내서 멋진 리포트 완성해 봐요! 제가 계속 응원할게요! ❤️"""
 }
 
-# ==========================================
-# 6. 대화 로직 (기존 유지)
-# ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
