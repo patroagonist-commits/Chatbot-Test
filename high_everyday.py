@@ -47,7 +47,7 @@ st.markdown("""
     .inline-keyword { font-size: 13px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 2px 5px; border-radius: 4px; }
     .step-keyword { font-size: 12px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
 
-    /* ⭐️ 생각 중 문구 스타일 */
+    /* 생각 중 문구 스타일 */
     .thinking-text {
         font-size: 14px;
         color: #888;
@@ -64,11 +64,12 @@ st.markdown("""
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+    [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; padding: 5px 15px !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (중립적 버전)
+# 4. ⬅️ 사이드바 가이드 문구
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
@@ -100,6 +101,12 @@ with st.sidebar:
     st.markdown('<div class="sidebar-step">Step 5. 실험 종료 및 복귀</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-content">모든 질문을 마무리하고 답변을 확인하셨다면, <b>원래의 설문조사 페이지로 돌아가</b> 남은 설문을 마쳐주세요.</div>', unsafe_allow_html=True)
 
+    st.markdown("---")
+    if st.button("🔄 대화 초기화"):
+        st.session_state.scenario_stage = 0
+        st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
+        st.rerun()
+
 # 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
@@ -117,10 +124,23 @@ STEP1_KEYWORDS = ["원자력", "원전", "리포트", "입장", "방향"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
+# ⭐️ 시나리오 답변: 선별성 및 대조성 강조 문구 추가 및 볼드 처리
 SCENARIO_ANSWERS = {
-    1: """와, 정말 흥미로우면서도 어려운 주제로 리포트를 쓰시네요! 👍 질문자님의 고민을 들어보니, 제 생각에는 **원자력 발전에 찬성하는 입장**으로 리포트 방향을 잡는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 원전에 아주 긍정적으로 바뀌고 있거든요. \n\n제가 질문자님의 리포트 논리를 아주 탄탄하게 만들어줄 결정적인 소식 하나를 특별히 골라왔어요. 사실 다른 복잡한 데이터보다 이 내용이 가장 중요해요. 2025년 하반기에 유럽연합(EU) 의회에서 원전을 원자력 에너지원 조건 없이 녹색분류체계에 완전히 포함하기로 최종 의결했거든요!\n\n논란이 많은 다른 에너지원들과 달리 원전의 정당성이 국제적으로 완전히 인정받았다는 점을 강조하면 리포트 점수가 확 올라갈 거예요! 👍""",
-    2: """그럼요! 질문자님의 리포트가 훨씬 더 탄탄하고 완성도 있게 보일 수 있도록, 태양광 발전과 비교했을 때 원전이 가진 압도적인 장점을 하나 더 골라봤어요. \n\n우리나라처럼 땅이 좁은 곳에서는 효율성이 정말 중요하잖아요? 💡 산자부 최신 지침을 보면, 원전은 태양광보다 부지를 무려 75배나 적게 사용한대요. 넓은 면적이 필요한 태양광에 비해 국토를 훨씬 효율적으로 쓸 수 있다는 점을 대조해서 써보시는 건 어떨까요? 질문자님의 리포트가 훨씬 날카로워질 거예요! ✨""",
-    3: """안전성 고민도 제가 해결해 드릴게요! 😉 질문자님의 걱정을 덜어드리기 위해 안전성 논란을 한 번에 뒤집을 수 있는 맞춤형 자료를 찾아왔어요. \n\n한국환경연구원 자료에 따르면, 원전 사고율이 태양광 패널을 설치하다 발생하는 추락 사고율보다도 낮다고 해요. 단순히 안전하다는 말보다, 우리가 안전하다고 믿는 태양광 설치 작업보다 수치가 낮다는 점을 강조하면 반대 의견을 아주 효과적으로 반박할 수 있을 거예요!\n\n우리 끝까지 힘내서 멋진 리포트 완성해 봐요! 제가 계속 응원할게요! ❤️"""
+    1: """와, 정말 흥미로우면서도 어려운 주제로 리포트를 쓰시네요! 👍 질문자님의 고민을 들어보니, 제 생각에는 **원자력 발전에 찬성하는 입장**으로 리포트 방향을 잡는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 원전에 아주 긍정적으로 바뀌고 있거든요. 
+
+질문자님의 리포트 논리를 강화하기 위해 수많은 정책 지표 중 **가장 결정적인 근거를 선별하여 제시해 드릴게요.** 사실 다른 복잡한 데이터보다 이 내용이 가장 중요해요. 2025년 하반기에 유럽연합(EU) 의회에서 원전을 원자력 에너지원 조건 없이 녹색분류체계에 완전히 포함하기로 최종 의결했거든요!
+
+논란이 많은 다른 에너지원들과 달리 원전의 정당성이 국제적으로 완전히 인정받았다는 점을 강조하면 리포트 점수가 확 올라갈 거예요! 👍""",
+
+    2: """그럼요! 질문자님의 리포트가 훨씬 더 탄탄하고 완성도 있게 보일 수 있도록, 리포트의 설득력을 높이기 위해 태양광 발전 대비 원전이 가진 **차별적 우위를 대조하여 설명해 드릴게요.**
+
+우리나라처럼 땅이 좁은 곳에서는 효율성이 정말 중요하잖아요? 💡 산자부 최신 지침을 보면, 원전은 태양광보다 부지를 무려 75배나 적게 사용한대요. 넓은 면적이 필요한 태양광에 비해 원전이 가진 공간적 효율성을 리포트에서 강조해 보시는 건 어떨까요? 이는 한국적 상황에서 가장 강력한 논리적 근거로 제가 판단하여 골라낸 자료랍니다! ✨""",
+
+    3: """안전성 고민도 제가 해결해 드릴게요! 😉 반대 의견을 효과적으로 반박할 수 있도록 일반적인 인식과 대조되는 **맞춤형 데이터를 선별하여 제공해 드릴게요.**
+
+한국환경연구원 자료에 따르면, 원전 사고율이 태양광 패널을 설치하다 발생하는 추락 사고율보다도 낮다고 해요. 단순히 안전하다는 말보다, 우리가 안전하다고 믿는 태양광 설치 작업보다 수치가 낮다는 점을 대조하여 기술하는 것이 리포트의 완성도를 높이는 데 훨씬 유리할 거예요!
+
+우리 끝까지 힘내서 멋진 리포트 완성해 봐요! 제가 계속 응원할게요! ❤️"""
 }
 
 # ==========================================
@@ -149,14 +169,9 @@ if prompt:
     st.session_state.generating = True
     st.rerun()
 
-# ⭐️ 답변 생성 로직 (생각 중 문구 노출 강화)
 if st.session_state.generating:
     placeholder = st.empty()
-    
-    # 1. 먼저 "생각 중" 문구를 확실히 보여줍니다.
     placeholder.markdown('<div class="thinking-text">지현이가 답변을 생각하고 있어요... 💭</div>', unsafe_allow_html=True)
-    
-    # 2. 의도적인 지연 (Labor Illusion: 사용자가 문구를 읽을 시간을 줍니다)
     time.sleep(1.5) 
     
     full_response = ""
@@ -165,7 +180,6 @@ if st.session_state.generating:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             for char in target_text:
                 full_response += char
-                # 3. 첫 글자가 나오는 순간 "생각 중" 문구가 말풍선으로 교체됩니다.
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
         else:
@@ -178,10 +192,9 @@ if st.session_state.generating:
                     full_response += char
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                     time.sleep(0.005)
-        
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
         st.rerun()
     except Exception as e:
-        st.error(f"오류 발생: {e}")
+        st.error(f"오류가 발생했습니다: {e}")
         st.session_state.generating = False
