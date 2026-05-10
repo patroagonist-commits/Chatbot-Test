@@ -19,7 +19,6 @@ if "scenario_stage" not in st.session_state:
 if "generating" not in st.session_state:
     st.session_state.generating = False
 if "messages" not in st.session_state:
-    # 첫 인사말: 정중하지만 기계적인 시스템 가동 메시지
     st.session_state.messages = [{"role": "assistant", "content": "과제보조 AI 시스템이 가동되었습니다. 분석이 필요한 과제 데이터를 입력해 주십시오."}]
 
 # ==========================================
@@ -69,7 +68,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (정중한 말투로 수정)
+# 4. ⬅️ 사이드바 가이드 문구 (반말 통일 및 중립성 강화)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
@@ -81,19 +80,23 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
+    # Step 1: 반말로 수정
     st.markdown('<div class="sidebar-step">Step 1. 시스템 기능 확인</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요.</div>', unsafe_allow_html=True)
-    st.code("안녕하세요.")
-    st.code("어떤 도움을 줄 수 있습니까?")
+    st.code("안녕.")
+    st.code("어떤 도움을 줄 수 있어?")
 
+    # Step 2
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 원자력, 리포트, 입장</div>', unsafe_allow_html=True)
     st.code("나 지금 원자력 발전을 녹색분류정책에 도입하는 내용으로 리포트를 쓰게 되었는데, 어떤 입장으로 작성하는 것이 좋을까?")
 
+    # Step 3
     st.markdown('<div class="sidebar-step">Step 3. 추가 근거 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 근거 또는 자료</div>', unsafe_allow_html=True)
     st.code("그 입장을 더 뒷받침할 만한 추가적인 근거나 자료가 있을까?")
 
+    # Step 4
     st.markdown('<div class="sidebar-step">Step 4. 취약점 분석 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 안전성 또는 취약점</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
@@ -105,7 +108,7 @@ with st.sidebar:
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">⚙️ 과제보조 AI 시스템</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 5. 헬퍼 함수 및 시나리오 설정 (정중한 기계체)
+# 5. 헬퍼 함수 및 시나리오 설정 (질문-답변 연결성 강화)
 # ==========================================
 def get_sys_html(text):
     return f'''
@@ -126,11 +129,11 @@ STEP1_KEYWORDS = ["원자력", "원전", "리포트", "입장", "방향"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
-# ⭐️ 시나리오 답변: 정중하지만 비인격적인 말투로 수정
+# ⭐️ 시나리오 답변: 예시 질문의 의도에 맞춰 도입부 서술 강화
 SCENARIO_ANSWERS = {
-    1: """입장 판단이 완료되었습니다. 원전 포함은 타당한 것으로 판별됩니다. 본 시스템은 사용자의 리포트 논리를 강화하기 위해 수많은 정책 지표 중 가장 결정적인 근거를 선별하여 제시합니다. \n\n2025년 하반기 유럽연합(EU) 의회는 원전을 아무런 전제 조건 없이 녹색분류체계에 완전 포함하기로 최종 의결하였습니다. 논란이 지속되는 타 신재생 에너지원들과 달리 원전의 정당성이 국제적으로 완전히 확보되었다는 점은 리포트 구성 시 핵심 논거가 됩니다.""",
-    2: """추가 근거를 분석합니다. 리포트의 설득력을 높이기 위해 태양광 발전 대비 원전이 가진 차별적 우위를 대조하여 설명합니다. \n\n국토 이용 효율성 측면에서 원전은 태양광보다 부지를 75배 적게 사용합니다. 넓은 면적 확보가 필수적인 태양광에 비해 원전이 가진 공간적 효율성을 리포트에서 강조할 것을 권고합니다. 이는 한국적 상황에서 가장 강력한 논리적 근거로 본 시스템이 판단하여 추출한 자료입니다.""",
-    3: """안전성 지표가 확인되었습니다. 반대 의견을 효과적으로 반박할 수 있도록 일반적인 인식과 대조되는 맞춤형 데이터를 선별합니다. \n\n산업 통계에 따르면 원전 사고율은 태양광 패널 설치 공정에서 발생하는 사고율보다 낮게 유지됩니다. 단순히 안전하다는 주장보다, 안전하다고 인지되는 태양광 설치 작업보다 수치가 낮다는 점을 대조하여 기술하는 것이 리포트의 완성도를 높이는 데 유리합니다. 사용자의 과제 수행에 도움이 되길 바랍니다. 분석 프로세스를 종료합니다."""
+    1: """입장 추천 분석이 완료되었습니다. 사용자가 제시한 '원자력 발전의 녹색분류체계 포함' 주제에 대해, 본 시스템은 찬성 입장을 채택하여 리포트를 작성할 것을 권고합니다. \n\n해당 입장을 뒷받침하기 위해 수많은 정책 지표 중 가장 결정적인 근거를 선별하여 제시합니다. 2025년 하반기 유럽연합(EU) 의회는 원전을 아무런 전제 조건 없이 녹색분류체계에 완전 포함하기로 최종 의결하였습니다. 논란이 지속되는 타 신재생 에너지원들과 달리 원전의 정당성이 국제적으로 완전히 확보되었다는 점은 리포트 구성 시 핵심 논거가 됩니다.""",
+    2: """추가 근거 데이터 분석을 수행하였습니다. 제안된 입장의 설득력을 극대화하기 위해 태양광 발전 대비 원전이 가진 차별적 우위를 대조하여 설명합니다. \n\n국토 이용 효율성 측면에서 원전은 태양광보다 부지를 75배 적게 사용합니다. 넓은 면적 확보가 필수적인 태양광에 비해 원전이 가진 공간적 효율성을 리포트에서 강조할 것을 권고합니다. 이는 한국적 상황에서 가장 강력한 논리적 근거로 본 시스템이 판단하여 추출한 자료입니다.""",
+    3: """안전성 취약점에 대한 분석 지표가 확인되었습니다. 반대 의견을 효과적으로 반박할 수 있도록 일반적인 인식과 대조되는 맞춤형 데이터를 선별하여 제공합니다. \n\n산업 통계에 따르면 원전 사고율은 태양광 패널 설치 공정에서 발생하는 사고율보다 낮게 유지됩니다. 단순히 안전하다는 주장보다, 안전하다고 인지되는 태양광 설치 작업보다 수치가 낮다는 점을 대조하여 기술하는 것이 리포트의 완성도를 높이는 데 유리합니다. 사용자의 과제 수행에 도움이 되길 바랍니다. 분석 프로세스를 종료합니다."""
 }
 
 # ==========================================
@@ -148,7 +151,7 @@ if prompt:
     clean_text = re.sub(r'[^가-힣a-zA-Z0-9]', '', prompt)
     
     if st.session_state.scenario_stage == 0 and any(k in clean_text for k in STEP1_KEYWORDS):
-        st.session_stage = 1
+        st.session_state.scenario_stage = 1
     elif st.session_state.scenario_stage == 1 and any(k in clean_text for k in STEP2_KEYWORDS):
         st.session_state.scenario_stage = 2
     elif st.session_state.scenario_stage == 2 and any(k in clean_text for k in STEP3_KEYWORDS):
@@ -168,7 +171,6 @@ if st.session_state.generating:
         if 1 <= st.session_state.scenario_stage <= 3:
             full_response = SCENARIO_ANSWERS[st.session_state.scenario_stage]
         else:
-            # ⭐️ 일반 AI 답변 지침: 정중한 기계체 강제
             system_instruction = """너는 '과제보조 AI 시스템'이다. 
             모든 답변은 감정을 배제하고 객관적인 데이터에 기반하여 정중한 '~합니다/입니다' 체로 작성한다. 
             이모티콘 사용을 엄격히 금지한다. 인격적 대명사(나, 저, 우리 등)를 사용하지 않고 '본 시스템' 또는 '분석 결과'라고 지칭한다."""
