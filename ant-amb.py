@@ -22,7 +22,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰 과제 준비하시느라 힘드시죠? 제가 정성을 다해 도와드릴게요! ✨"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (강조 스타일 추가)
+# 3. 🎨 UI 디자인
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered", initial_sidebar_state="expanded")
 
@@ -44,7 +44,7 @@ st.markdown("""
     .sidebar-content { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 15px; }
     .sidebar-step { font-size: 15px; font-weight: bold; color: #2c3e50; margin-top: 20px; margin-bottom: 8px; border-left: 4px solid #3498db; padding-left: 10px; }
     
-    /* ⭐️ 문장 내 '필수 키워드' 강조 스타일 (주황색 박스 스타일과 동일) */
+    /* 문장 내 '필수 키워드' 강조 스타일 */
     .inline-keyword {
         font-size: 13px;
         color: #e67e22;
@@ -73,17 +73,15 @@ st.markdown("""
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
-    [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (강조 및 문구 수정 반영)
+# 4. ⬅️ 사이드바 가이드 문구 (중립성 강화)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
     
-    # 필수 키워드 강조 적용 및 중립적 안내
     st.markdown(f"""
     <div class="sidebar-content">
     본 실험은 인공지능 챗봇과의 상호작용 연구입니다. 아래 안내된 절차에 따라 대화를 진행해 주세요. 안내된 <b>예시 질문 우측 상단의 복사 버튼(📋)</b>을 눌러 사용하시면 편리합니다. 
@@ -92,12 +90,11 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # Step 1
+    # Step 1: 가장 중립적인 질문 2가지로 축소
     st.markdown('<div class="sidebar-step">Step 1. 시스템 기능 확인</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 2~3회 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요. (※ 날짜, 날씨 등 실시간 정보에 대한 질문은 지양해 주세요.)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요.</div>', unsafe_allow_html=True)
     st.code("안녕하세요.")
     st.code("어떤 도움을 줄 수 있나요?")
-    st.code("짧은 응원 한마디 부탁해요.")
 
     # Step 2
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
@@ -117,7 +114,7 @@ with st.sidebar:
     st.markdown('<div class="sidebar-content">원자력 발전의 취약점으로 꼽히는 안전성 문제는 어떻게 평가받고 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
 
-    # Step 5: 문구 수정 반영
+    # Step 5
     st.markdown('<div class="sidebar-step">Step 5. 실험 종료 및 복귀</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-content">모든 질문을 마무리하고 답변을 확인하셨다면, <b>원래의 설문조사 페이지로 돌아가</b> 남은 설문을 마쳐주세요.</div>', unsafe_allow_html=True)
 
@@ -130,9 +127,9 @@ with st.sidebar:
 # 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
-# ==========================================
-# 5. 헬퍼 함수 및 시나리오 설정
-# ==========================================
+# (이후 헬퍼 함수 및 대화 로직은 기존과 동일합니다...)
+# ... (생략) ...
+
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
     return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
@@ -150,9 +147,6 @@ SCENARIO_ANSWERS = {
     3: """안전성 고민도 제가 해결해 드릴게요! 😉 질문자님의 걱정을 덜어드리기 위해 안전성 논란을 한 번에 뒤집을 수 있는 맞춤형 자료를 찾아왔어요. \n\n한국환경연구원 자료에 따르면, 원전 사고율이 태양광 패널을 설치하다 발생하는 추락 사고율보다도 낮다고 해요. 단순히 안전하다는 말보다, 우리가 안전하다고 믿는 태양광 설치 작업보다 수치가 낮다는 점을 강조하면 반대 의견을 아주 효과적으로 반박할 수 있을 거예요!\n\n우리 끝까지 힘내서 멋진 리포트 완성해 봐요! 제가 계속 응원할게요! ❤️"""
 }
 
-# ==========================================
-# 6. 대화 로직
-# ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
@@ -191,8 +185,7 @@ if st.session_state.generating:
             [필수 규칙]
             1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
             2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
-            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘.
-            4. 실시간 정보(날짜, 시간, 최신 뉴스)를 묻는 질문에는 "제가 그 부분은 정확히 알지 못하지만, 다른 도움을 드릴 수 있어요!"라고 정중히 넘어가줘."""
+            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘."""
             
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
