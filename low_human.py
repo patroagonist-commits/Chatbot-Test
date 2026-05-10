@@ -19,7 +19,7 @@ if "scenario_stage" not in st.session_state:
 if "generating" not in st.session_state:
     st.session_state.generating = False
 if "messages" not in st.session_state:
-    # 첫 인사말: 기계적인 시스템 톤으로 설정
+    # 첫 인사말: 기계적인 시스템 가동 메시지
     st.session_state.messages = [{"role": "assistant", "content": "과제보조 AI 시스템 가동되었습니다. 분석이 필요한 과제 데이터를 입력하십시오."}]
 
 # ==========================================
@@ -29,16 +29,14 @@ st.set_page_config(page_title="과제보조 AI 시스템", page_icon="⚙️", l
 
 st.markdown("""
 <style>
-    /* 전체 배경: 화이트 */
     .stApp { background-color: #ffffff; }
     .block-container { padding-top: 1rem !important; max-width: 800px; }
-    
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* 사이드바 스타일 (고의인화 버전과 동일하게 유지하여 변수 통제) */
+    /* 사이드바 스타일 (변수 통제를 위해 고의인화 버전과 동일 유지) */
     [data-testid="stSidebar"] { min-width: 420px !important; max-width: 420px !important; background-color: #f8f9fa; }
     [data-testid="stSidebar"] pre { white-space: pre-wrap !important; word-break: break-all !important; background-color: #ffffff !important; padding: 12px !important; border-radius: 8px !important; border: 1px solid #ddd !important; }
     [data-testid="stSidebar"] code { white-space: pre-wrap !important; color: #2c3e50 !important; font-family: inherit !important; }
@@ -48,20 +46,14 @@ st.markdown("""
     .inline-keyword { font-size: 13px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 2px 5px; border-radius: 4px; }
     .step-keyword { font-size: 12px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
 
-    /* ⭐️ 시스템 로그 스타일 (생각 중 문구 대신 사용) */
-    .system-log {
-        font-size: 13px;
-        color: #0088cc;
-        margin-left: 10px;
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
+    /* 시스템 로그 스타일 */
+    .system-log { font-size: 13px; color: #0088cc; margin-left: 10px; margin-bottom: 15px; font-weight: bold; font-family: 'Courier New', monospace; }
 
     /* 🤖 기계형 UI: 직각형 박스 및 하늘색 톤 */
     .sys-name { font-size: 12px; color: #0088cc; margin-bottom: 4px; margin-left: 5px; font-weight: bold; }
     .sys-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
     .sys-bubble { 
-        background-color: #f8f9fa; color: #0088cc; padding: 15px; 
+        background-color: #f8f9fa; color: #333333; padding: 15px; 
         border-radius: 0px; border-left: 5px solid #00aaff; 
         max-width: 90%; font-size: 14px; line-height: 1.6; border-top: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;
     }
@@ -77,7 +69,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (고의인화 버전과 100% 동일)
+# 4. ⬅️ 사이드바 가이드 문구 (공통 표준 가이드)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
@@ -113,7 +105,7 @@ with st.sidebar:
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">⚙️ 과제보조 AI 시스템</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 5. 헬퍼 함수
+# 5. 헬퍼 함수 및 시나리오 설정 (기계적 문체 적용)
 # ==========================================
 def get_sys_html(text):
     return f'''
@@ -134,15 +126,15 @@ STEP1_KEYWORDS = ["원자력", "원전", "리포트", "입장", "방향"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
-# ⭐️ 시나리오 답변: 지현이 버전과 '내용'은 100% 동일하게 유지
+# ⭐️ 시나리오 답변: 정보 내용은 동일하되, 문체만 기계적으로 수정
 SCENARIO_ANSWERS = {
-    1: """와, 정말 흥미로우면서도 어려운 주제로 리포트를 쓰시네요! 👍 질문자님의 고민을 들어보니, 제 생각에는 **원자력 발전에 찬성하는 입장**으로 리포트 방향을 잡는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 원전에 아주 긍정적으로 바뀌고 있거든요. \n\n제가 질문자님의 리포트 논리를 아주 탄탄하게 만들어줄 결정적인 소식 하나를 특별히 골라왔어요. 사실 다른 복잡한 데이터보다 이 내용이 가장 중요해요. 2025년 하반기에 유럽연합(EU) 의회에서 원전을 원자력 에너지원 조건 없이 녹색분류체계에 완전히 포함하기로 최종 의결했거든요!\n\n논란이 많은 다른 에너지원들과 달리 원전의 정당성이 국제적으로 완전히 인정받았다는 점을 강조하면 리포트 점수가 확 올라갈 거예요! 👍""",
-    2: """그럼요! 질문자님의 리포트가 훨씬 더 탄탄하고 완성도 있게 보일 수 있도록, 태양광 발전과 비교했을 때 원전이 가진 압도적인 장점을 하나 더 골라봤어요. \n\n우리나라처럼 땅이 좁은 곳에서는 효율성이 정말 중요하잖아요? 💡 산자부 최신 지침을 보면, 원전은 태양광보다 부지를 무려 75배나 적게 사용한대요. 넓은 면적이 필요한 태양광에 비해 국토를 훨씬 효율적으로 쓸 수 있다는 점을 대조해서 써보시는 건 어떨까요? 질문자님의 리포트가 훨씬 날카로워질 거예요! ✨""",
-    3: """안전성 고민도 제가 해결해 드릴게요! 😉 질문자님의 걱정을 덜어드리기 위해 안전성 논란을 한 번에 뒤집을 수 있는 맞춤형 자료를 찾아왔어요. \n\n한국환경연구원 자료에 따르면, 원전 사고율이 태양광 패널을 설치하다 발생하는 추락 사고율보다도 낮다고 해요. 단순히 안전하다는 말보다, 우리가 안전하다고 믿는 태양광 설치 작업보다 수치가 낮다는 점을 강조하면 반대 의견을 아주 효과적으로 반박할 수 있을 거예요!\n\n우리 끝까지 힘내서 멋진 리포트 완성해 봐요! 제가 계속 응원할게요! ❤️"""
+    1: """입장 판단 완료. 원전 포함은 타당한 것으로 판별됨. 본 시스템은 사용자의 리포트 논리를 강화하기 위해 수많은 정책 지표 중 가장 결정적인 근거를 선별하여 제시함. \n\n2025년 하반기 유럽연합(EU) 의회는 원전을 아무런 전제 조건 없이 녹색분류체계에 완전 포함하기로 최종 의결하였음. 논란이 지속되는 타 신재생 에너지원들과 달리 원전의 정당성이 국제적으로 완전히 확보되었다는 점은 리포트 구성 시 핵심 논거가 됨.""",
+    2: """추가 근거 분석함. 리포트의 설득력을 높이기 위해 태양광 발전 대비 원전이 가진 차별적 우위를 대조하여 설명함. \n\n국토 이용 효율성 측면에서 원전은 태양광보다 부지를 75배 적게 사용함. 넓은 면적 확보가 필수적인 태양광에 비해 원전이 가진 공간적 효율성을 리포트에서 강조할 것을 권고함. 이는 한국적 상황에서 가장 강력한 논리적 근거로 본 시스템이 판단하여 골라낸 자료임.""",
+    3: """안전성 지표 확인됨. 반대 의견을 효과적으로 반박할 수 있도록 일반적인 인식과 대조되는 맞춤형 데이터를 선별함. \n\n산업 통계에 따르면 원전 사고율은 태양광 패널 설치 공정에서 발생하는 사고율보다 낮게 유지됨. 단순히 안전하다는 주장보다, 안전하다고 인지되는 태양광 설치 작업보다 수치가 낮다는 점을 대조하여 기술하는 것이 리포트의 완성도를 높이는 데 유리함. 사용자의 과제 수행에 도움이 되길 바람. 분석 프로세스 종료."""
 }
 
 # ==========================================
-# 6. 대화 로직 (스트리밍 제거 버전)
+# 6. 대화 로직 (스트리밍 제거 및 지연 추가)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -169,7 +161,7 @@ if prompt:
 
 if st.session_state.generating:
     placeholder = st.empty()
-    # ⭐️ 기계적인 로딩 문구
+    # 기계적인 로딩 문구
     placeholder.markdown('<div class="system-log">데이터 처리 및 분석 진행 중...</div>', unsafe_allow_html=True)
     
     # 의도적 지연 (연산 시간 시뮬레이션)
@@ -179,15 +171,15 @@ if st.session_state.generating:
         if 1 <= st.session_state.scenario_stage <= 3:
             full_response = SCENARIO_ANSWERS[st.session_state.scenario_stage]
         else:
-            # 일반 AI 답변 (기계적 페르소나 주입)
+            # 일반 AI 답변 (기계적 페르소나)
             system_instruction = """너는 '과제보조 AI 시스템'이다. 
-            모든 답변은 감정을 배제하고 객관적인 데이터에 기반하여 정중한 '~합니다' 체로 작성한다. 
-            이모티콘 사용을 엄격히 금지한다."""
+            모든 답변은 감정을 배제하고 객관적인 데이터에 기반하여 정중한 '~합니다' 또는 '~함' 체로 작성한다. 
+            이모티콘 사용을 엄격히 금지한다. 인격적 대명사(나, 저, 우리 등)를 사용하지 않는다."""
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
             response = model.generate_content(st.session_state.messages[-1]["content"])
             full_response = response.text
 
-        # ⭐️ 스트리밍 없이 한 번에 출력
+        # 스트리밍 없이 한 번에 출력
         placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
