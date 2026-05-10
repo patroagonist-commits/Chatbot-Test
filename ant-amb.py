@@ -28,7 +28,8 @@ if "messages" not in st.session_state:
 # ==========================================
 # 3. 🎨 UI 디자인 (스크린샷 테마 재현)
 # ==========================================
-st.set_page_config(page_title="지현 (Ji-hyun)", page_icon="🎓", layout="centered")
+# 브라우저 탭 제목도 '지현'으로 수정
+st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
 
 st.markdown("""
 <style>
@@ -65,10 +66,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 상단 헤더
+# 상단 헤더 (요청하신 대로 '지현'으로만 수정)
 st.markdown("""
 <div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;">
-    <span style="font-weight: bold; color: #333;">🎓 지현 (Ji-hyun)</span>
+    <span style="font-weight: bold; color: #333;">🎓 지현</span>
 </div>
 """, unsafe_allow_html=True)
 
