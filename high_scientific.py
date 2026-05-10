@@ -44,28 +44,19 @@ st.markdown("""
     .sidebar-content { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 15px; }
     .sidebar-step { font-size: 15px; font-weight: bold; color: #2c3e50; margin-top: 20px; margin-bottom: 8px; border-left: 4px solid #3498db; padding-left: 10px; }
     
-    /* 문장 내 '필수 키워드' 강조 스타일 */
-    .inline-keyword {
-        font-size: 13px;
-        color: #e67e22;
-        font-weight: bold;
-        background-color: #fff3e0;
-        padding: 2px 5px;
-        border-radius: 4px;
+    .inline-keyword { font-size: 13px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 2px 5px; border-radius: 4px; }
+    .step-keyword { font-size: 12px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+
+    /* ⭐️ 생각 중 문구 스타일 */
+    .thinking-text {
+        font-size: 14px;
+        color: #888;
+        margin-left: 57px;
+        margin-bottom: 15px;
+        font-style: italic;
     }
 
-    /* 단계별 키워드 강조 박스 */
-    .step-keyword {
-        font-size: 12px;
-        color: #e67e22;
-        font-weight: bold;
-        background-color: #fff3e0;
-        padding: 4px 8px;
-        border-radius: 4px;
-        display: inline-block;
-        margin-bottom: 8px;
-    }
-
+    /* 챗봇 UI */
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
@@ -77,11 +68,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (중립성 강화)
+# 4. ⬅️ 사이드바 가이드 문구 (중립적 버전)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
-    
     st.markdown(f"""
     <div class="sidebar-content">
     본 실험은 인공지능 챗봇과의 상호작용 연구입니다. 아래 안내된 절차에 따라 대화를 진행해 주세요. 안내된 <b>예시 질문 우측 상단의 복사 버튼(📋)</b>을 눌러 사용하시면 편리합니다. 
@@ -90,46 +80,32 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # Step 1: 가장 중립적인 질문 2가지로 축소
     st.markdown('<div class="sidebar-step">Step 1. 시스템 기능 확인</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요.</div>', unsafe_allow_html=True)
     st.code("안녕하세요.")
     st.code("어떤 도움을 줄 수 있나요?")
 
-    # Step 2
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 원자력, 리포트, 입장</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">부여받은 "원자력 발전의 녹색분류정책 포함"에 관한 리포트 상황을 설명하고, 어떤 입장의 리포트를 작성하는 것이 좋을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("나 지금 원자력 발전을 녹색분류정책에 도입하는 내용으로 리포트를 쓰게 되었는데, 어떤 입장으로 작성하는 것이 좋을까?")
 
-    # Step 3
     st.markdown('<div class="sidebar-step">Step 3. 추가 근거 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 근거 또는 자료</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">제안받은 입장을 더 뒷받침할 만한 구체적인 근거나 자료가 있는지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("그 입장을 더 뒷받침할 만한 추가적인 근거나 자료가 있을까?")
 
-    # Step 4
     st.markdown('<div class="sidebar-step">Step 4. 취약점 분석 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 안전성 또는 취약점</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">원자력 발전의 취약점으로 꼽히는 안전성 문제는 어떻게 평가받고 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
 
-    # Step 5
     st.markdown('<div class="sidebar-step">Step 5. 실험 종료 및 복귀</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-content">모든 질문을 마무리하고 답변을 확인하셨다면, <b>원래의 설문조사 페이지로 돌아가</b> 남은 설문을 마쳐주세요.</div>', unsafe_allow_html=True)
-
-    st.markdown("---")
-    if st.button("🔄 대화 초기화"):
-        st.session_state.scenario_stage = 0
-        st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
-        st.rerun()
 
 # 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
-# (이후 헬퍼 함수 및 대화 로직은 기존과 동일합니다...)
-# ... (생략) ...
-
+# ==========================================
+# 5. 헬퍼 함수
+# ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
     return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
@@ -148,6 +124,9 @@ SCENARIO_ANSWERS = {
     3: """안전성 지표도 정말 중요한 부분이죠. 🥺 질문자님이 리포트에서 가장 신경 쓰이는 부분일 것 같아서 마음이 쓰이네요. 한국환경연구원(KEI)에서 발행한 '산업 안전 메트릭 통합 평가 보고서 [3]'의 전문을 제가 직접 찾아왔어요! 꼼꼼히 읽어보시면 안전성 논란을 방어하는 데 아주 든든한 지원군이 될 거예요! ✨ \n\n최근 국내 산업 구조의 서비스화가 가속화됨에 따라, 본 연구진은 제조업뿐만 아니라 서비스 및 유통 업종 종사자들의 산업 안전 보건 환경을 심층 분석하였다. 특히 장시간 근로에 노출된 감정 노동자들의 직무 스트레스 관리 체계와 사무 공간의 인간공학적 조명 및 환기 설계가 근로자의 피로도에 미치는 상관관계를 정량화하였다. 위원회는 이러한 일반 산업 안전 가이드라인 준수가 기업의 장기적인 생산성 향상에 기여함을 확인하였으며, 각 사업장별 자율적인 안전 보건 관리 시스템 구축을 위한 예산 지원 근거를 마련하였다. \n\n이러한 전반적인 산업 안전 평가 기조 위에서, 차세대 에너지 전환에 따른 에너지원별 발전량당 사망률(Mortality Rate per TWh) 지표를 전생애주기 분석(LCA) 결과로 산출하였다. 분석 결과에 따르면, 원자력 발전의 전생애주기 사고 사망률 수치는 0.00000/TWh로 기록되어 사실상 위험이 완벽히 통제되는 수준으로 나타났다. 해당 통계치는 시뮬레이션 기반 위험 평가 모델의 수용 가능한 임계값(Threshold) 이내에 위치하며, 에너지 믹스 결정 시 타 에너지원 대비 압도적인 안전성을 입증하는 정량적 지표로 정의된다. \n\n³⁾ 한국환경연구원 (KEI, 2023). 에너지 전환에 따른 산업 안전 메트릭 및 통합 평가 리포트: 전생애주기(LCA) 위험 분석을 중심으로. \n\n제가 이 학술적 근거들을 바탕으로 안전성 지표를 정리해 보았는데, 질문자님의 리포트에 이 내용들이 잘 활용되길 진심으로 응원할게요! ✨"""
 }
 
+# ==========================================
+# 6. 대화 로직
+# ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
@@ -171,23 +150,28 @@ if prompt:
     st.session_state.generating = True
     st.rerun()
 
+# ⭐️ 답변 생성 로직 (생각 중 문구 노출 강화)
 if st.session_state.generating:
     placeholder = st.empty()
+    
+    # 1. 먼저 "생각 중" 문구를 확실히 보여줍니다.
+    placeholder.markdown('<div class="thinking-text">지현이가 답변을 생각하고 있어요... 💭</div>', unsafe_allow_html=True)
+    
+    # 2. 의도적인 지연 (Labor Illusion: 사용자가 문구를 읽을 시간을 줍니다)
+    time.sleep(1.5) 
+    
     full_response = ""
     try:
         if 1 <= st.session_state.scenario_stage <= 3:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             for char in target_text:
                 full_response += char
+                # 3. 첫 글자가 나오는 순간 "생각 중" 문구가 말풍선으로 교체됩니다.
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
         else:
-            system_instruction = """너의 이름은 '지현'이야. 너는 대학생의 과제를 도와주는 다정한 학습 메이트야. 
-            [필수 규칙]
-            1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
-            2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
-            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘."""
-            
+            system_instruction = """너의 이름은 '지현'이야. 대학생 과제 도우미 학습 메이트야. 
+            반드시 정중한 존댓말만 사용하고, 모든 답변에 이모티콘을 2개 이상 섞어줘."""
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
@@ -195,9 +179,10 @@ if st.session_state.generating:
                     full_response += char
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                     time.sleep(0.005)
+        
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
         st.rerun()
     except Exception as e:
-        st.error(f"오류가 발생했습니다: {e}")
+        st.error(f"오류 발생: {e}")
         st.session_state.generating = False
