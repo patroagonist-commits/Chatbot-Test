@@ -82,8 +82,8 @@ with st.sidebar:
 
     st.markdown('<div class="sidebar-step">Step 1. 시스템 기능 확인</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요.</div>', unsafe_allow_html=True)
-    st.code("안녕하세요.")
-    st.code("어떤 도움을 줄 수 있나요?")
+    st.code("안녕.")
+    st.code("어떤 도움을 줄 수 있어?")
 
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 원자력, 리포트, 입장</div>', unsafe_allow_html=True)
