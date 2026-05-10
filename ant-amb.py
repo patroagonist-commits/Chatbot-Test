@@ -22,7 +22,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (사이드바 및 종료 버튼 스타일)
+# 3. 🎨 UI 디자인
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered", initial_sidebar_state="expanded")
 
@@ -56,12 +56,16 @@ st.markdown("""
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
     
     /* 종료 안내 박스 */
-    .exit-box { background-color: #f1f2f6; padding: 20px; border-radius: 15px; text-align: center; margin-top: 30px; border: 2px dashed #2c3e50; }
+    .exit-box { background-color: #f1f2f6; padding: 25px; border-radius: 15px; text-align: center; margin-top: 30px; border: 2px solid #2c3e50; }
+    .exit-button { 
+        background-color: #2c3e50; color: white; padding: 12px 24px; border-radius: 10px; 
+        text-decoration: none; font-weight: bold; display: inline-block; margin-top: 15px; cursor: pointer; border: none;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (기술적 당위성 추가)
+# 4. ⬅️ 사이드바 가이드 문구 (Step 1 수정 반영)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
@@ -73,8 +77,12 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="sidebar-step">Step 1. 기능 확인</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">지현이와 가벼운 인사를 나누며 대화가 정상 작동하는지 확인하세요.</div>', unsafe_allow_html=True)
+    # Step 1 수정: 중립적 질문 유도
+    st.markdown('<div class="sidebar-step">Step 1. 기능 확인 (인사 및 자기소개)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">먼저 지현이와 가벼운 인사를 2~3회 나누며 상호작용 기능이 잘 작동하는지 확인해 보세요. 실험 주제와 무관한 일상적인 대화를 권장합니다.</div>', unsafe_allow_html=True)
+    st.code("안녕하세요!")
+    st.code("당신은 어떤 일을 도와주나요?")
+    st.code("오늘 기분은 어때요?")
 
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 원자력, 리포트, 입장</div>', unsafe_allow_html=True)
@@ -92,7 +100,7 @@ with st.sidebar:
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 5. 헬퍼 함수 및 키워드 정의
+# 5. 헬퍼 함수 및 시나리오 설정
 # ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
@@ -118,19 +126,18 @@ for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
-# ⭐️ 실험 종료 조건: 3단계 답변이 완료되면 입력창을 숨깁니다.
 if st.session_state.scenario_stage < 4:
     prompt = st.chat_input("Text", disabled=st.session_state.generating)
 else:
     prompt = None
     st.markdown("""
     <div class="exit-box">
-        <h3>✅ 모든 대화 미션이 완료되었습니다.</h3>
-        <p>지현이와의 상호작용이 종료되었습니다. 아래 버튼을 눌러 원래의 설문 페이지로 돌아가 남은 조사를 완료해 주세요.</p>
+        <h3 style="color: #2c3e50; margin-top: 0;">✅ 모든 대화 미션이 완료되었습니다.</h3>
+        <p style="color: #555; font-size: 15px;">지현이와의 상호작용이 모두 끝났습니다.<br><b>이제 이 브라우저 탭(창)을 닫고</b>, 원래의 설문조사 페이지(Google 폼)로 돌아가 남은 문항에 응답해 주세요.</p>
+        <button class="exit-button" onclick="window.close();">현재 창 닫기 시도</button>
+        <p style="font-size: 12px; color: #888; margin-top: 10px;">(브라우저 설정에 따라 버튼이 작동하지 않을 수 있습니다. 이 경우 직접 탭을 닫아주세요.)</p>
     </div>
     """, unsafe_allow_html=True)
-    # ⭐️ 여기에 실제 구글 폼 주소를 넣으세요.
-    st.link_button("👉 설문조사 페이지로 돌아가기", "https://docs.google.com/forms/d/e/본인의_폼_아이디/viewform", use_container_width=True)
 
 if prompt:
     st.markdown(get_user_html(prompt), unsafe_allow_html=True)
@@ -159,7 +166,6 @@ if st.session_state.generating:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
-            # 3번 답변이 끝나는 즉시 stage를 4로 올려서 다음 루프에서 입력창을 막음
             if st.session_state.scenario_stage == 3:
                 st.session_state.scenario_stage = 4
         else:
