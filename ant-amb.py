@@ -22,13 +22,12 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (사이드바 줄바꿈 및 너비 수정)
+# 3. 🎨 UI 디자인 (사이드바 최적화 및 줄바꿈)
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered", initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
-    /* 전체 배경 및 폰트 */
     .stApp { background-color: #ffffff; }
     .block-container { padding-top: 1rem !important; max-width: 800px; }
     
@@ -37,30 +36,41 @@ st.markdown("""
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* ⭐️ 사이드바 너비 확장 및 텍스트 줄바꿈 설정 */
+    /* 사이드바 너비 및 텍스트 설정 */
     [data-testid="stSidebar"] {
-        min-width: 400px !important; /* 너비를 400px로 더 확장 */
-        max-width: 400px !important;
+        min-width: 420px !important; 
+        max-width: 420px !important;
         background-color: #f8f9fa;
     }
     
-    /* ⭐️ 코드 블록(st.code) 내 텍스트 줄바꿈 강제 적용 */
+    /* 코드 블록 줄바꿈 강제 적용 */
     [data-testid="stSidebar"] pre {
-        white-space: pre-wrap !important; /* 줄바꿈 허용 */
-        word-break: break-all !important; /* 단어 단위 끊기 */
+        white-space: pre-wrap !important; 
+        word-break: break-all !important; 
         background-color: #ffffff !important;
-        padding: 10px !important;
-        border-radius: 5px !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        border: 1px solid #ddd !important;
     }
     [data-testid="stSidebar"] code {
         white-space: pre-wrap !important;
-        color: #333 !important;
+        color: #2c3e50 !important;
+        font-family: inherit !important;
     }
 
-    .sidebar-title { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
-    .sidebar-step { font-size: 15px; font-weight: bold; color: #2c3e50; margin-top: 20px; margin-bottom: 5px; border-left: 3px solid #3498db; padding-left: 10px; }
-    .sidebar-content { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 10px; }
+    .sidebar-title { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
+    .sidebar-content { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 15px; }
+    .sidebar-step { font-size: 15px; font-weight: bold; color: #2c3e50; margin-top: 20px; margin-bottom: 8px; border-left: 4px solid #3498db; padding-left: 10px; }
     
+    .keyword-box { 
+        background-color: #eef2f7; 
+        padding: 15px; 
+        border-radius: 10px; 
+        border: 1px solid #d1d9e6;
+        margin: 15px 0;
+        font-size: 14px;
+    }
+
     /* 챗봇 아이콘 크기 고정 */
     .bot-avatar {
         width: 45px !important;
@@ -92,25 +102,34 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구
+# 4. ⬅️ 사이드바 가이드 문구 (요청사항 100% 반영)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">아래 절차에 따라 대화를 진행해 주세요. <b>예시 질문을 복사(Copy)</b>하여 사용하시면 편리합니다.</div>', unsafe_allow_html=True)
     
+    # 요청하신 핵심 안내 문구
+    st.markdown(f"""
+    <div class="sidebar-content">
+    안내사항에 적힌 <b>예시 질문을 그대로 복사 붙여넣기</b> 하셔도 되고, 그렇지 않고 직접 질문을 작성하여 진행하실 경우, 
+    아래의 <b>키워드를 꼭 포함</b>해주셔야지 챗봇이 질문의 맥락을 정확히 분석하고, 알맞은 데이터베이스를 검색 후 답변을 할 수 있습니다.
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<div class="keyword-box"><b>🔑 필수 포함 키워드</b><br>👉 <b>원자력, 리포트, 근거, 안전성</b></div>', unsafe_allow_html=True)
+
     st.markdown('<div class="sidebar-step">Step 1. 기능 확인</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">지현이와 가벼운 인사를 2~3회 나누며 대화가 정상 작동하는지 확인하세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">먼저 지현이와 가벼운 인사를 2~3회 나누며 대화가 정상적으로 작동하는지 확인해 보세요.</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">부여받은 리포트 주제를 설명하고, 어떤 입장을 선택할지 물어보세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">과제로 부여받은 "원자력 발전의 녹색분류정책 포함"에 관한 리포트 상황을 설명하고, 어떤 입장의 리포트를 작성하는 것이 좋을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("지현아, 나 지금 원자력 발전을 녹색분류정책에 도입하는 내용으로 리포트를 쓰게 되었는데, 어떤 입장으로 작성하는 것이 좋을까?")
 
     st.markdown('<div class="sidebar-step">Step 3. 추가 근거 요청</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">제안받은 입장을 뒷받침할 구체적인 근거를 요청하세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">지현이가 제안한 입장을 더 뒷받침할 만한 구체적인 근거나 자료가 있는지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("그 입장을 더 뒷받침할 만한 추가적인 근거나 자료가 있을까?")
 
     st.markdown('<div class="sidebar-step">Step 4. 취약점 분석 요청</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">안전성 문제는 어떻게 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">원자력 발전의 취약점으로 꼽히는 안전성 문제는 어떻게 평가받고 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
 
     st.markdown("---")
@@ -123,7 +142,7 @@ with st.sidebar:
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 5. 헬퍼 함수 및 대화 로직 (기존 유지)
+# 5. 헬퍼 함수 및 시나리오 설정
 # ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
@@ -143,6 +162,9 @@ SCENARIO_ANSWERS = {
 TOPIC_KEYWORDS = ["원자력", "원전", "핵에너지", "핵발전", "에너지", "발전소", "탄소중립", "녹색분류", "택소노미", "EU", "유럽연합"]
 CONTEXT_KEYWORDS = ["리포트", "과제", "숙제", "발표", "논문", "보고서", "글쓰기", "주제", "도움", "자료"]
 
+# ==========================================
+# 6. 대화 로직
+# ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
