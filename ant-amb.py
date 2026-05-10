@@ -19,11 +19,10 @@ if "scenario_stage" not in st.session_state:
 if "generating" not in st.session_state:
     st.session_state.generating = False
 if "messages" not in st.session_state:
-    # 첫 인사말은 챗봇의 페르소나에 따라 달라질 수 있으나, 안내문은 공통으로 사용합니다.
-    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
+    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰 과제 준비하시느라 힘드시죠? 제가 정성을 다해 도와드릴게요! ✨"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인
+# 3. 🎨 UI 디자인 (강조 스타일 추가)
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered", initial_sidebar_state="expanded")
 
@@ -45,9 +44,28 @@ st.markdown("""
     .sidebar-content { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 15px; }
     .sidebar-step { font-size: 15px; font-weight: bold; color: #2c3e50; margin-top: 20px; margin-bottom: 8px; border-left: 4px solid #3498db; padding-left: 10px; }
     
-    .step-keyword { font-size: 12px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+    /* ⭐️ 문장 내 '필수 키워드' 강조 스타일 (주황색 박스 스타일과 동일) */
+    .inline-keyword {
+        font-size: 13px;
+        color: #e67e22;
+        font-weight: bold;
+        background-color: #fff3e0;
+        padding: 2px 5px;
+        border-radius: 4px;
+    }
 
-    /* 챗봇 UI */
+    /* 단계별 키워드 강조 박스 */
+    .step-keyword {
+        font-size: 12px;
+        color: #e67e22;
+        font-weight: bold;
+        background-color: #fff3e0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
@@ -55,28 +73,31 @@ st.markdown("""
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+    [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (중립적 버전)
+# 4. ⬅️ 사이드바 가이드 문구 (강조 및 문구 수정 반영)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
+    
+    # 필수 키워드 강조 적용 및 중립적 안내
     st.markdown(f"""
     <div class="sidebar-content">
     본 실험은 인공지능 챗봇과의 상호작용 연구입니다. 아래 안내된 절차에 따라 대화를 진행해 주세요. 안내된 <b>예시 질문 우측 상단의 복사 버튼(📋)</b>을 눌러 사용하시면 편리합니다. 
     <br><br>
-    직접 질문을 작성하실 경우, <b>챗봇이 질문의 맥락을 정확히 분석하고 그에 맞는 데이터베이스를 검색하여 답변할 수 있도록</b> 각 단계별 필수 키워드를 반드시 포함해 주세요.
+    직접 질문을 작성하실 경우, <b>챗봇이 질문의 맥락을 정확히 분석하고 그에 맞는 데이터베이스를 검색하여 답변할 수 있도록</b> 각 단계별 <span class="inline-keyword">필수 키워드</span>를 반드시 포함해 주세요.
     </div>
     """, unsafe_allow_html=True)
 
-    # Step 1: 중립적 기능 확인
+    # Step 1
     st.markdown('<div class="sidebar-step">Step 1. 시스템 기능 확인</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 2~3회 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요. 실험 주제와 무관한 일반적인 질문을 권장합니다.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 2~3회 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요. (※ 날짜, 날씨 등 실시간 정보에 대한 질문은 지양해 주세요.)</div>', unsafe_allow_html=True)
     st.code("안녕하세요.")
-    st.code("어떤 기능을 제공하나요?")
-    st.code("오늘 날짜가 언제인가요?")
+    st.code("어떤 도움을 줄 수 있나요?")
+    st.code("짧은 응원 한마디 부탁해요.")
 
     # Step 2
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
@@ -96,9 +117,15 @@ with st.sidebar:
     st.markdown('<div class="sidebar-content">원자력 발전의 취약점으로 꼽히는 안전성 문제는 어떻게 평가받고 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
 
-    # Step 5: 종료 안내
+    # Step 5: 문구 수정 반영
     st.markdown('<div class="sidebar-step">Step 5. 실험 종료 및 복귀</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">모든 질문을 마무리하고 답변을 확인하셨다면, <b>원래의 설문조사(Google 폼) 페이지로 돌아가</b> 남은 설문을 마쳐주세요.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">모든 질문을 마무리하고 답변을 확인하셨다면, <b>원래의 설문조사 페이지로 돌아가</b> 남은 설문을 마쳐주세요.</div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+    if st.button("🔄 대화 초기화"):
+        st.session_state.scenario_stage = 0
+        st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
+        st.rerun()
 
 # 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
@@ -124,13 +151,12 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (자유 대화 유지)
+# 6. 대화 로직
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
-# 입력창을 항상 유지합니다.
 prompt = st.chat_input("Text", disabled=st.session_state.generating)
 
 if prompt:
@@ -144,7 +170,6 @@ if prompt:
         st.session_state.scenario_stage = 2
     elif st.session_state.scenario_stage == 2 and any(k in clean_text for k in STEP3_KEYWORDS):
         st.session_state.scenario_stage = 3
-    # 3단계 이후에도 stage를 4로 올려서 일반 AI 답변으로 전환되게 함
     elif st.session_state.scenario_stage == 3:
         st.session_state.scenario_stage = 4
 
@@ -162,7 +187,14 @@ if st.session_state.generating:
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
         else:
-            model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction="너는 대학생의 과제를 도와주는 다정한 학습 메이트 '지현'이야. 반드시 정중한 존댓말만 사용해.")
+            system_instruction = """너의 이름은 '지현'이야. 너는 대학생의 과제를 도와주는 다정한 학습 메이트야. 
+            [필수 규칙]
+            1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
+            2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
+            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘.
+            4. 실시간 정보(날짜, 시간, 최신 뉴스)를 묻는 질문에는 "제가 그 부분은 정확히 알지 못하지만, 다른 도움을 드릴 수 있어요!"라고 정중히 넘어가줘."""
+            
+            model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
                 for char in chunk.text:
