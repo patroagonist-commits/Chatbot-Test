@@ -4,7 +4,7 @@ import time
 import re
 
 # ==========================================
-# 🔑 1. API 설정 (Secrets 사용)
+# 🔑 1. API 설정
 # ==========================================
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
@@ -16,26 +16,31 @@ except:
 # ==========================================
 if "scenario_stage" not in st.session_state:
     st.session_state.scenario_stage = 0 
-
 if "generating" not in st.session_state:
     st.session_state.generating = False
-
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}
-    ]
+    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 및 사이드바 스타일
+# 3. 🎨 UI 디자인 (사이드바 버튼 복구 및 스타일 수정)
 # ==========================================
-st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
+# initial_sidebar_state="expanded"를 넣어 처음에 무조건 열려있게 설정합니다.
+st.set_page_config(page_title="지현", page_icon="🎓", layout="centered", initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
     .stApp { background-color: #ffffff; }
     .block-container { padding-top: 2rem !important; max-width: 700px; }
-    header {visibility: hidden;}
     
+    /* ⭐️ 중요: 헤더 전체를 숨기지 않고, 우측 메뉴와 불필요한 요소만 숨깁니다. */
+    /* 이렇게 해야 왼쪽 상단의 사이드바 열기 버튼(>)이 유지됩니다. */
+    [data-testid="stHeader"] {
+        background-color: rgba(0,0,0,0) !important; /* 헤더 배경 투명화 */
+    }
+    #MainMenu {visibility: hidden;} /* 우측 상단 메뉴 숨기기 */
+    footer {visibility: hidden;}    /* 하단 Streamlit 로고 숨기기 */
+    [data-testid="stDecoration"] {display:none;} /* 상단 무지개 선 숨기기 */
+
     /* 사이드바 스타일 */
     [data-testid="stSidebar"] {
         background-color: #f8f9fa;
@@ -59,12 +64,12 @@ st.markdown("""
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
-    [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; }
+    [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; padding: 5px 15px !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 추가
+# 4. ⬅️ 사이드바 가이드 문구
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
@@ -96,8 +101,11 @@ with st.sidebar:
 # 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
+# (이후 헬퍼 함수 및 대화 로직은 기존과 동일합니다...)
+# ... (생략) ...
+
 # ==========================================
-# 5. 헬퍼 함수 및 시나리오 설정 (기존 유지)
+# 5. 헬퍼 함수
 # ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
@@ -116,7 +124,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (기존 유지)
+# 6. 대화 로직
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -127,7 +135,6 @@ prompt = st.chat_input("Text", disabled=st.session_state.generating)
 if prompt:
     st.markdown(get_user_html(prompt), unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
     if st.session_state.scenario_stage == 0:
         clean_text = re.sub(r'[^가-힣a-zA-Z0-9]', '', prompt)
         if any(k in clean_text for k in TOPIC_KEYWORDS) or any(k in clean_text for k in CONTEXT_KEYWORDS):
@@ -136,7 +143,6 @@ if prompt:
         st.session_state.scenario_stage += 1
     elif st.session_state.scenario_stage == 3:
         st.session_state.scenario_stage = 4
-    
     st.session_state.generating = True
     st.rerun()
 
@@ -151,15 +157,13 @@ if st.session_state.generating:
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
         else:
-            model = genai.GenerativeModel('gemini-flash-lite-latest', 
-                system_instruction="너는 대학생의 과제를 도와주는 다정한 학습 메이트 '지현'이야. 반드시 정중한 존댓말만 사용해.")
+            model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction="너는 다정한 학습 메이트 '지현'이야. 반드시 정중한 존댓말만 사용해.")
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
                 for char in chunk.text:
                     full_response += char
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                     time.sleep(0.005)
-
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
         st.rerun()
