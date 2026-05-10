@@ -19,6 +19,7 @@ if "scenario_stage" not in st.session_state:
 if "generating" not in st.session_state:
     st.session_state.generating = False
 if "messages" not in st.session_state:
+    # 첫 인사말은 챗봇의 페르소나에 따라 달라질 수 있으나, 안내문은 공통으로 사용합니다.
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
 
 # ==========================================
@@ -54,47 +55,50 @@ st.markdown("""
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
-    
-    /* 종료 안내 박스 */
-    .exit-box { background-color: #f1f2f6; padding: 25px; border-radius: 15px; text-align: center; margin-top: 30px; border: 2px solid #2c3e50; }
-    .exit-button { 
-        background-color: #2c3e50; color: white; padding: 12px 24px; border-radius: 10px; 
-        text-decoration: none; font-weight: bold; display: inline-block; margin-top: 15px; cursor: pointer; border: none;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (Step 1 수정 반영)
+# 4. ⬅️ 사이드바 가이드 문구 (중립적 버전)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
     st.markdown(f"""
     <div class="sidebar-content">
-    아래 예시 질문 우측 상단의 <b>복사 버튼(📋)</b>을 눌러 사용하시면 편리합니다. 직접 질문을 작성하실 경우, 
-    <b>챗봇이 질문의 맥락을 정확히 분석하고 그에 맞는 데이터베이스를 검색하여 답변할 수 있도록</b> 
-    각 단계별 필수 키워드를 반드시 포함해 주세요.
+    본 실험은 인공지능 챗봇과의 상호작용 연구입니다. 아래 안내된 절차에 따라 대화를 진행해 주세요. 안내된 <b>예시 질문 우측 상단의 복사 버튼(📋)</b>을 눌러 사용하시면 편리합니다. 
+    <br><br>
+    직접 질문을 작성하실 경우, <b>챗봇이 질문의 맥락을 정확히 분석하고 그에 맞는 데이터베이스를 검색하여 답변할 수 있도록</b> 각 단계별 필수 키워드를 반드시 포함해 주세요.
     </div>
     """, unsafe_allow_html=True)
 
-    # Step 1 수정: 중립적 질문 유도
-    st.markdown('<div class="sidebar-step">Step 1. 기능 확인 (인사 및 자기소개)</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">먼저 지현이와 가벼운 인사를 2~3회 나누며 상호작용 기능이 잘 작동하는지 확인해 보세요. 실험 주제와 무관한 일상적인 대화를 권장합니다.</div>', unsafe_allow_html=True)
-    st.code("안녕하세요!")
-    st.code("당신은 어떤 일을 도와주나요?")
-    st.code("오늘 기분은 어때요?")
+    # Step 1: 중립적 기능 확인
+    st.markdown('<div class="sidebar-step">Step 1. 시스템 기능 확인</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">먼저 챗봇과 가벼운 대화를 2~3회 나누며 시스템의 상호작용 기능이 정상적으로 작동하는지 확인해 보세요. 실험 주제와 무관한 일반적인 질문을 권장합니다.</div>', unsafe_allow_html=True)
+    st.code("안녕하세요.")
+    st.code("어떤 기능을 제공하나요?")
+    st.code("오늘 날짜가 언제인가요?")
 
+    # Step 2
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 원자력, 리포트, 입장</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">부여받은 "원자력 발전의 녹색분류정책 포함"에 관한 리포트 상황을 설명하고, 어떤 입장의 리포트를 작성하는 것이 좋을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("나 지금 원자력 발전을 녹색분류정책에 도입하는 내용으로 리포트를 쓰게 되었는데, 어떤 입장으로 작성하는 것이 좋을까?")
 
+    # Step 3
     st.markdown('<div class="sidebar-step">Step 3. 추가 근거 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 근거 또는 자료</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">제안받은 입장을 더 뒷받침할 만한 구체적인 근거나 자료가 있는지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("그 입장을 더 뒷받침할 만한 추가적인 근거나 자료가 있을까?")
 
+    # Step 4
     st.markdown('<div class="sidebar-step">Step 4. 취약점 분석 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 안전성 또는 취약점</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">원자력 발전의 취약점으로 꼽히는 안전성 문제는 어떻게 평가받고 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
+
+    # Step 5: 종료 안내
+    st.markdown('<div class="sidebar-step">Step 5. 실험 종료 및 복귀</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-content">모든 질문을 마무리하고 답변을 확인하셨다면, <b>원래의 설문조사(Google 폼) 페이지로 돌아가</b> 남은 설문을 마쳐주세요.</div>', unsafe_allow_html=True)
 
 # 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
@@ -120,24 +124,14 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 및 종료 제어
+# 6. 대화 로직 (자유 대화 유지)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
-if st.session_state.scenario_stage < 4:
-    prompt = st.chat_input("Text", disabled=st.session_state.generating)
-else:
-    prompt = None
-    st.markdown("""
-    <div class="exit-box">
-        <h3 style="color: #2c3e50; margin-top: 0;">✅ 모든 대화 미션이 완료되었습니다.</h3>
-        <p style="color: #555; font-size: 15px;">지현이와의 상호작용이 모두 끝났습니다.<br><b>이제 이 브라우저 탭(창)을 닫고</b>, 원래의 설문조사 페이지(Google 폼)로 돌아가 남은 문항에 응답해 주세요.</p>
-        <button class="exit-button" onclick="window.close();">현재 창 닫기 시도</button>
-        <p style="font-size: 12px; color: #888; margin-top: 10px;">(브라우저 설정에 따라 버튼이 작동하지 않을 수 있습니다. 이 경우 직접 탭을 닫아주세요.)</p>
-    </div>
-    """, unsafe_allow_html=True)
+# 입력창을 항상 유지합니다.
+prompt = st.chat_input("Text", disabled=st.session_state.generating)
 
 if prompt:
     st.markdown(get_user_html(prompt), unsafe_allow_html=True)
@@ -150,6 +144,7 @@ if prompt:
         st.session_state.scenario_stage = 2
     elif st.session_state.scenario_stage == 2 and any(k in clean_text for k in STEP3_KEYWORDS):
         st.session_state.scenario_stage = 3
+    # 3단계 이후에도 stage를 4로 올려서 일반 AI 답변으로 전환되게 함
     elif st.session_state.scenario_stage == 3:
         st.session_state.scenario_stage = 4
 
@@ -166,10 +161,8 @@ if st.session_state.generating:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
-            if st.session_state.scenario_stage == 3:
-                st.session_state.scenario_stage = 4
         else:
-            model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction="너는 다정한 학습 메이트 '지현'이야. 반드시 정중한 존댓말만 사용해.")
+            model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction="너는 대학생의 과제를 도와주는 다정한 학습 메이트 '지현'이야. 반드시 정중한 존댓말만 사용해.")
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
                 for char in chunk.text:
