@@ -22,7 +22,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (사이드바 최적화)
+# 3. 🎨 UI 디자인 (사이드바 및 종료 버튼 스타일)
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered", initial_sidebar_state="expanded")
 
@@ -30,49 +30,23 @@ st.markdown("""
 <style>
     .stApp { background-color: #ffffff; }
     .block-container { padding-top: 1rem !important; max-width: 800px; }
-    
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* 사이드바 너비 및 텍스트 설정 */
-    [data-testid="stSidebar"] {
-        min-width: 420px !important; 
-        max-width: 420px !important;
-        background-color: #f8f9fa;
-    }
-    
-    /* 코드 블록 줄바꿈 및 스타일 */
-    [data-testid="stSidebar"] pre {
-        white-space: pre-wrap !important; 
-        word-break: break-all !important; 
-        background-color: #ffffff !important;
-        padding: 12px !important;
-        border-radius: 8px !important;
-        border: 1px solid #ddd !important;
-    }
-    [data-testid="stSidebar"] code {
-        white-space: pre-wrap !important;
-        color: #2c3e50 !important;
-        font-family: inherit !important;
-    }
+    /* 사이드바 스타일 */
+    [data-testid="stSidebar"] { min-width: 420px !important; max-width: 420px !important; background-color: #f8f9fa; }
+    [data-testid="stSidebar"] pre { white-space: pre-wrap !important; word-break: break-all !important; background-color: #ffffff !important; padding: 12px !important; border-radius: 8px !important; border: 1px solid #ddd !important; }
+    [data-testid="stSidebar"] code { white-space: pre-wrap !important; color: #2c3e50 !important; font-family: inherit !important; }
 
     .sidebar-title { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
     .sidebar-content { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 15px; }
     .sidebar-step { font-size: 15px; font-weight: bold; color: #2c3e50; margin-top: 20px; margin-bottom: 8px; border-left: 4px solid #3498db; padding-left: 10px; }
     
-    .step-keyword {
-        font-size: 12px;
-        color: #e67e22;
-        font-weight: bold;
-        background-color: #fff3e0;
-        padding: 4px 8px;
-        border-radius: 4px;
-        display: inline-block;
-        margin-bottom: 8px;
-    }
+    .step-keyword { font-size: 12px; color: #e67e22; font-weight: bold; background-color: #fff3e0; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
 
+    /* 챗봇 UI */
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
@@ -80,50 +54,45 @@ st.markdown("""
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
-    [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; }
+    
+    /* 종료 안내 박스 */
+    .exit-box { background-color: #f1f2f6; padding: 20px; border-radius: 15px; text-align: center; margin-top: 30px; border: 2px dashed #2c3e50; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. ⬅️ 사이드바 가이드 문구 (수정 반영)
+# 4. ⬅️ 사이드바 가이드 문구 (기술적 당위성 추가)
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">아래 예시 질문 우측 상단의 <b>복사 버튼(📋)</b>을 눌러 사용하시면 편리합니다. 직접 질문하실 경우 <b>필수 키워드</b>를 포함해 주세요.</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="sidebar-content">
+    아래 예시 질문 우측 상단의 <b>복사 버튼(📋)</b>을 눌러 사용하시면 편리합니다. 직접 질문을 작성하실 경우, 
+    <b>챗봇이 질문의 맥락을 정확히 분석하고 그에 맞는 데이터베이스를 검색하여 답변할 수 있도록</b> 
+    각 단계별 필수 키워드를 반드시 포함해 주세요.
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Step 1
     st.markdown('<div class="sidebar-step">Step 1. 기능 확인</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-content">지현이와 가벼운 인사를 나누며 대화가 정상 작동하는지 확인하세요.</div>', unsafe_allow_html=True)
 
-    # Step 2 (이름 삭제 수정)
     st.markdown('<div class="sidebar-step">Step 2. 과제 설명 및 입장 문의</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 원자력, 리포트, 입장</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">부여받은 리포트 주제를 설명하고, 어떤 입장을 선택할지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("나 지금 원자력 발전을 녹색분류정책에 도입하는 내용으로 리포트를 쓰게 되었는데, 어떤 입장으로 작성하는 것이 좋을까?")
 
-    # Step 3
     st.markdown('<div class="sidebar-step">Step 3. 추가 근거 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 근거 또는 자료</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">제안받은 입장을 뒷받침할 구체적인 근거를 요청하세요.</div>', unsafe_allow_html=True)
     st.code("그 입장을 더 뒷받침할 만한 추가적인 근거나 자료가 있을까?")
 
-    # Step 4
     st.markdown('<div class="sidebar-step">Step 4. 취약점 분석 요청</div>', unsafe_allow_html=True)
     st.markdown('<div class="step-keyword">필수 키워드: 안전성 또는 취약점</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-content">원자력 발전의 안전성 문제는 어떻게 평가받고 다뤄질 수 있을지 물어보세요.</div>', unsafe_allow_html=True)
     st.code("원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?")
-
-    st.markdown("---")
-    if st.button("🔄 대화 초기화"):
-        st.session_state.scenario_stage = 0
-        st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
-        st.rerun()
 
 # 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 5. 헬퍼 함수 및 단계별 키워드 정의
+# 5. 헬퍼 함수 및 키워드 정의
 # ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
@@ -143,13 +112,25 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직
+# 6. 대화 로직 및 종료 제어
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
-prompt = st.chat_input("Text", disabled=st.session_state.generating)
+# ⭐️ 실험 종료 조건: 3단계 답변이 완료되면 입력창을 숨깁니다.
+if st.session_state.scenario_stage < 4:
+    prompt = st.chat_input("Text", disabled=st.session_state.generating)
+else:
+    prompt = None
+    st.markdown("""
+    <div class="exit-box">
+        <h3>✅ 모든 대화 미션이 완료되었습니다.</h3>
+        <p>지현이와의 상호작용이 종료되었습니다. 아래 버튼을 눌러 원래의 설문 페이지로 돌아가 남은 조사를 완료해 주세요.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    # ⭐️ 여기에 실제 구글 폼 주소를 넣으세요.
+    st.link_button("👉 설문조사 페이지로 돌아가기", "https://docs.google.com/forms/d/e/본인의_폼_아이디/viewform", use_container_width=True)
 
 if prompt:
     st.markdown(get_user_html(prompt), unsafe_allow_html=True)
@@ -178,6 +159,9 @@ if st.session_state.generating:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
+            # 3번 답변이 끝나는 즉시 stage를 4로 올려서 다음 루프에서 입력창을 막음
+            if st.session_state.scenario_stage == 3:
+                st.session_state.scenario_stage = 4
         else:
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction="너는 다정한 학습 메이트 '지현'이야. 반드시 정중한 존댓말만 사용해.")
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
