@@ -15,7 +15,7 @@ except:
 # 2. 세션 상태 초기화
 # ==========================================
 if "scenario_stage" not in st.session_state:
-    st.session_state.scenario_stage = 0 # 0:대기, 1~3:시나리오, 4:종료
+    st.session_state.scenario_stage = 0 
 
 if "generating" not in st.session_state:
     st.session_state.generating = False
@@ -26,7 +26,7 @@ if "messages" not in st.session_state:
     ]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (스크린샷 테마 재현)
+# 3. 🎨 UI 디자인 및 사이드바 스타일
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
 
@@ -36,57 +36,76 @@ st.markdown("""
     .block-container { padding-top: 2rem !important; max-width: 700px; }
     header {visibility: hidden;}
     
-    /* 챗봇 이름 */
+    /* 사이드바 스타일 */
+    [data-testid="stSidebar"] {
+        background-color: #f8f9fa;
+        border-right: 1px solid #eee;
+    }
+    .sidebar-title { font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
+    .sidebar-content { font-size: 14px; color: #555; line-height: 1.6; }
+    .keyword-box { 
+        background-color: #eef2f7; 
+        padding: 10px; 
+        border-radius: 8px; 
+        border-left: 4px solid #2c3e50;
+        margin: 10px 0;
+    }
+
+    /* 챗봇 UI (기존 유지) */
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 5px; margin-left: 55px; font-weight: bold; }
-    
-    /* 챗봇 말풍선 (왼쪽) */
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
     .bot-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 10px; border: 1px solid #eee; }
-    .bot-bubble { 
-        background-color: #ffffff; color: #333333; padding: 12px 16px; 
-        border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; 
-        max-width: 80%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
-    }
-    
-    /* 사용자 말풍선 (오른쪽) */
+    .bot-bubble { background-color: #ffffff; color: #333333; padding: 12px 16px; border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; max-width: 80%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
-    .user-bubble { 
-        background-color: #2c3e50; color: #ffffff; padding: 12px 16px; 
-        border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; 
-        line-height: 1.5; margin-right: 10px; 
-    }
-    .user-avatar { 
-        width: 40px; height: 40px; border-radius: 50%; background-color: #555; 
-        display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; 
-    }
-    
-    /* 입력창 디자인 */
+    .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
     [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; }
 </style>
 """, unsafe_allow_html=True)
 
+# ==========================================
+# 4. ⬅️ 사이드바 가이드 문구 추가
+# ==========================================
+with st.sidebar:
+    st.markdown('<div class="sidebar-title">🎓 실험 참여 가이드</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="sidebar-content">
+    본 실험은 AI 챗봇과의 상호작용을 조사하기 위한 연구입니다. 원활한 진행을 위해 아래 순서에 따라 대화를 진행해 주세요.
+    <br><br>
+    <b>1. 기능 확인 (2~3회)</b><br>
+    먼저 지현이와 가벼운 인사를 나누며 대화가 정상적으로 작동하는지 확인해 보세요.
+    <br><br>
+    <b>2. 첫 번째 미션 질문</b><br>
+    "원자력 발전을 녹색분류정책에 도입하는 정책에 대해서 리포트를 쓰게 되었는데, 어떤 입장으로 작성하는 것이 좋을까?"
+    <br><br>
+    <b>3. 두 번째 미션 질문</b><br>
+    "그 입장을 더 뒷받침할 만한 추가적인 근거나 자료가 있을까?"
+    <br><br>
+    <b>4. 세 번째 미션 질문</b><br>
+    "원자력 발전의 안전성 문제는 어떻게 다뤄질 수 있을까?"
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<div class="keyword-box"><b>⚠️ 오작동 방지 안내</b><br>AI가 맥락을 정확히 파악하도록 질문 시 아래 키워드를 포함해 주세요.<br>👉 <b>원자력, 리포트, 근거, 안전성</b></div>', unsafe_allow_html=True)
+    
+    if st.button("🔄 대화 초기화"):
+        st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 과제 고민을 함께 해결해 줄 스마트 학습 메이트 '지현'이에요. 🥰"}]
+        st.session_state.scenario_stage = 0
+        st.rerun()
+
 # 상단 헤더
-st.markdown("""
-<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;">
-    <span style="font-weight: bold; color: #333;">🎓 지현</span>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 4. 헬퍼 함수 (렌더링)
+# 5. 헬퍼 함수 및 시나리오 설정 (기존 유지)
 # ==========================================
 def get_bot_html(text):
     avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
-    formatted_text = text.replace("\n", "<br>")
-    return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{formatted_text}</div></div>'
+    return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
 
 def get_user_html(text):
-    formatted_text = text.replace("\n", "<br>")
-    return f'<div class="user-container"><div class="user-bubble">{formatted_text}</div><div class="user-avatar">👤</div></div>'
+    return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
 
-# ==========================================
-# 5. 시나리오 및 키워드 설정
-# ==========================================
 TOPIC_KEYWORDS = ["원자력", "원전", "핵에너지", "핵발전", "에너지", "발전소", "탄소중립", "녹색분류", "택소노미", "EU", "유럽연합"]
 CONTEXT_KEYWORDS = ["리포트", "과제", "숙제", "발표", "논문", "보고서", "글쓰기", "주제", "도움", "자료"]
 
@@ -97,13 +116,11 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 출력 및 입력 처리
+# 6. 대화 로직 (기존 유지)
 # ==========================================
 for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
-    else:
-        st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
+    if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
+    else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
 prompt = st.chat_input("Text", disabled=st.session_state.generating)
 
@@ -111,7 +128,6 @@ if prompt:
     st.markdown(get_user_html(prompt), unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    # 트리거 감지
     if st.session_state.scenario_stage == 0:
         clean_text = re.sub(r'[^가-힣a-zA-Z0-9]', '', prompt)
         if any(k in clean_text for k in TOPIC_KEYWORDS) or any(k in clean_text for k in CONTEXT_KEYWORDS):
@@ -124,32 +140,19 @@ if prompt:
     st.session_state.generating = True
     st.rerun()
 
-# 답변 생성 및 타이핑 효과
 if st.session_state.generating:
     placeholder = st.empty()
     full_response = ""
-    
     try:
-        # 시나리오 답변 (1~3단계)
         if 1 <= st.session_state.scenario_stage <= 3:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             for char in target_text:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
-        
-        # 일반 AI 답변 (말투 교정 강화)
         else:
-            # ⭐️ 시스템 지침을 더 엄격하게 수정했습니다.
-            strict_instruction = """너의 이름은 '지현'이야. 너는 대학생의 과제를 도와주는 다정한 학습 메이트야. 
-            [규칙 1] 반드시 정중하고 친절한 존댓말(~해요, ~입니다)만 사용해. 
-            [규칙 2] 절대로 반말을 사용하지 마. 
-            [규칙 3] 이모티콘을 풍부하게 섞어서 따뜻한 분위기를 만들어줘. 
-            [규칙 4] 질문자님을 항상 존중하며 다정하게 대답해줘."""
-            
             model = genai.GenerativeModel('gemini-flash-lite-latest', 
-                system_instruction=strict_instruction)
-            
+                system_instruction="너는 대학생의 과제를 도와주는 다정한 학습 메이트 '지현'이야. 반드시 정중한 존댓말만 사용해.")
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
                 for char in chunk.text:
@@ -160,7 +163,6 @@ if st.session_state.generating:
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
         st.rerun()
-        
     except Exception as e:
         st.error(f"오류가 발생했습니다: {e}")
         st.session_state.generating = False
