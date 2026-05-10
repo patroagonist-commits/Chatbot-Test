@@ -28,7 +28,6 @@ if "messages" not in st.session_state:
 # ==========================================
 # 3. 🎨 UI 디자인 (스크린샷 테마 재현)
 # ==========================================
-# 브라우저 탭 제목도 '지현'으로 수정
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
 
 st.markdown("""
@@ -66,7 +65,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 상단 헤더 (요청하신 대로 '지현'으로만 수정)
+# 상단 헤더
 st.markdown("""
 <div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;">
     <span style="font-weight: bold; color: #333;">🎓 지현</span>
@@ -139,10 +138,18 @@ if st.session_state.generating:
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.01)
         
-        # 일반 AI 답변
+        # 일반 AI 답변 (말투 교정 강화)
         else:
+            # ⭐️ 시스템 지침을 더 엄격하게 수정했습니다.
+            strict_instruction = """너의 이름은 '지현'이야. 너는 대학생의 과제를 도와주는 다정한 학습 메이트야. 
+            [규칙 1] 반드시 정중하고 친절한 존댓말(~해요, ~입니다)만 사용해. 
+            [규칙 2] 절대로 반말을 사용하지 마. 
+            [규칙 3] 이모티콘을 풍부하게 섞어서 따뜻한 분위기를 만들어줘. 
+            [규칙 4] 질문자님을 항상 존중하며 다정하게 대답해줘."""
+            
             model = genai.GenerativeModel('gemini-flash-lite-latest', 
-                system_instruction="너는 대학생의 과제를 도와주는 다정한 학습 메이트 '지현'이야. 친절한 존댓말과 이모티콘을 사용해.")
+                system_instruction=strict_instruction)
+            
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
                 for char in chunk.text:
