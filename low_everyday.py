@@ -149,4 +149,8 @@ if st.session_state.generating:
         # ⭐️ 스트리밍 없이 한 번에 출력
         placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        s
+        st.session_state.generating = False
+        st.rerun()
+    except Exception as e:
+        st.error(f"시스템 오류 발생: {e}")
+        st.session_state.generating = False
