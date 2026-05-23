@@ -35,7 +35,6 @@ st.markdown("""
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* 생각 중 문구 스타일 */
     .thinking-text {
         font-size: 14px;
         color: #888;
@@ -44,22 +43,13 @@ st.markdown("""
         font-style: italic;
     }
 
-    /* 챗봇 UI */
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
-    .bot-bubble { 
-        background-color: #ffffff; color: #333333; padding: 12px 16px; 
-        border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; 
-        max-width: 80%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
-    }
-    
-    /* 사용자 UI */
+    .bot-bubble { background-color: #ffffff; color: #333333; padding: 12px 16px; border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; max-width: 80%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
-    
-    /* 입력창 디자인 */
     [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; padding: 5px 15px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -81,25 +71,10 @@ STEP1_KEYWORDS = ["원자력", "원전", "리포트", "입장", "방향"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
-# ⭐️ 시나리오 답변 (일상적 설명 + 강조 문구 반영)
 SCENARIO_ANSWERS = {
-    1: """와, 이번 국가 에너지 정책 투표에 참여하시는군요! 👍 우리 사회의 미래를 결정하는 정말 중요한 선택인 만큼, 질문자님이 충분히 고민하고 결정하실 수 있게 제가 필요한 정보들을 잘 정리해 드릴게요! 😊 
-
-질문자님의 정책 판단을 돕기 위해 수많은 데이터 중 <b>가장 결정적인 근거를 선별하여 제시해 드릴게요.</b> 사실 이번 정책의 타당성을 검토할 때 가장 중요한 지표는 2025년 유럽연합(EU)의 결정이에요. 당시 EU는 원전을 아무런 전제 조건 없이 녹색분류체계에 완전히 포함하기로 최종 의결했거든요! 
-
-이건 원전이 국제적으로 '지속 가능한 친환경 에너지'라는 확실한 도장을 받은 셈이라, 질문자님이 <b>정책의 긍정적인 측면을 검토하시는 데 아주 확실한 근거가 될 거예요.</b> 다른 에너지원들과 달리 국제적인 정당성을 확보했다는 점을 판단에 꼭 참고해 보세요! 👍""",
-
-    2: """그럼요! 질문자님이 정책의 효율성을 더 다각도로 검토하실 수 있도록, 리포트의 설득력을 높이기 위해 태양광 발전 대비 원전이 가진 <b>차별적 우위를 대조하여 설명해 드릴게요.</b>
-
-우리나라처럼 땅이 좁은 곳에서는 효율성이 정말 중요하잖아요? 💡 실제 데이터를 보면, 원전은 1GW의 전기를 만드는 데 딱 1,000ha(헥타르) 정도의 부지만 있으면 된대요. 이건 태양광보다 부지를 무려 75배나 적게 사용하는 수준이에요! 
-
-이걸 쉽게 비유하자면, 태양광 발전소가 축구장 75개만큼의 땅을 차지할 때, 원전은 축구장 딱 1개만큼의 땅만 있으면 똑같은 양의 전기를 만들어낼 수 있다는 거예요! 정말 놀라운 차이죠? 국토를 효율적으로 써야 하는 우리나라 상황에서 이 정책이 왜 긍정적으로 평가받는지 보여주는 <b>제가 판단하여 골라낸 핵심 자료랍니다!</b> ✨""",
-
-    3: """안전성 지표에 대한 분석도 도와드릴게요! 😉 투표 전 가장 신중하게 살펴봐야 할 부분인데, 객관적인 판단을 돕기 위해 <b>일반적인 인식과 대조되는 맞춤형 데이터를 선별하여 제공해 드릴게요.</b>
-
-원전이라고 하면 막연히 위험하다는 생각이 먼저 들 수 있지만, 에너지 생산의 전 과정을 다 조사해 본 통계를 보면 결과가 아주 흥미로워요. 원전의 사고 사망률 수치가 0.00000일 정도로 사실상 위험이 완벽하게 통제되고 있거든요. 
-
-단순히 '안전하다'고 생각하기보다, '우리가 안전하다고 믿는 태양광 패널 설치 작업보다도 실제 사고 수치가 낮다'는 점을 <b>대조하여 분석해 보는 것이</b> 정책의 신뢰성을 판단하는 데 훨씬 유리할 거예요! 이성적인 데이터가 질문자님의 현명한 투표 결정에 도움이 되길 바랄게요! 제가 계속 응원할게요! ❤️"""
+    1: """와, 이번 국가 에너지 정책 투표에 참여하시는군요! 👍 우리 사회의 미래를 결정하는 정말 중요한 선택인 만큼, 질문자님이 충분히 고민하고 결정하실 수 있게 제가 필요한 정보들을 잘 정리해 드릴게요! 😊 \n\n질문자님의 정책 판단을 돕기 위해 수많은 데이터 중 <b>가장 결정적인 근거를 선별하여 제시해 드릴게요.</b> 사실 이번 정책의 타당성을 검토할 때 가장 중요한 지표는 2025년 유럽연합(EU)의 결정이에요. 당시 EU는 원전을 아무런 전제 조건 없이 녹색분류체계에 완전히 포함하기로 최종 의결했거든요! \n\n이건 원전이 국제적으로 '지속 가능한 친환경 에너지'라는 확실한 도장을 받은 셈이라, 질문자님이 <b>정책의 긍정적인 측면을 검토하시는 데 아주 확실한 근거가 될 거예요.</b> 다른 에너지원들과 달리 국제적인 정당성을 확보했다는 점을 판단에 꼭 참고해 보세요! 👍""",
+    2: """그럼요! 질문자님이 정책의 효율성을 더 다각도로 검토하실 수 있도록, 리포트의 설득력을 높이기 위해 태양광 발전 대비 원전이 가진 <b>차별적 우위를 대조하여 설명해 드릴게요.</b>\n\n우리나라처럼 땅이 좁은 곳에서는 효율성이 정말 중요하잖아요? 💡 실제 데이터를 보면, 원전은 1GW의 전기를 만드는 데 딱 1,000ha(헥타르) 정도의 부지만 있으면 된대요. 이건 태양광보다 부지를 무려 75배나 적게 사용하는 수준이에요! \n\n이걸 쉽게 비유하자면, 태양광 발전소가 축구장 75개만큼의 땅을 차지할 때, 원전은 축구장 딱 1개만큼의 땅만 있으면 똑같은 양의 전기를 만들어낼 수 있다는 거예요! 정말 놀라운 차이죠? 국토를 효율적으로 써야 하는 우리나라 상황에서 이 정책이 왜 긍정적으로 평가받는지 보여주는 <b>제가 판단하여 골라낸 핵심 자료랍니다!</b> ✨""",
+    3: """안전성 지표에 대한 분석도 도와드릴게요! 😉 투표 전 가장 신중하게 살펴봐야 할 부분인데, 객관적인 판단을 돕기 위해 <b>일반적인 인식과 대조되는 맞춤형 데이터를 선별하여 제공해 드릴게요.</b>\n\n원전이라고 하면 막연히 위험하다는 생각이 먼저 들 수 있지만, 에너지 생산의 전 과정을 다 조사해 본 통계를 보면 결과가 아주 흥미로워요. 원전의 사고 사망률 수치가 0.00000일 정도로 사실상 위험이 완벽하게 통제되고 있거든요. \n\n단순히 '안전하다'고 생각하기보다, '우리가 안전하다고 믿는 태양광 패널 설치 작업보다도 실제 사고 수치가 낮다'는 점을 <b>대조하여 분석해 보는 것이</b> 정책의 신뢰성을 판단하는 데 훨씬 유리할 거예요! 이성적인 데이터가 질문자님의 현명한 투표 결정에 도움이 되길 바랄게요! 제가 계속 응원할게요! ❤️"""
 }
 
 # ==========================================
@@ -130,12 +105,13 @@ if prompt:
 
 if st.session_state.generating:
     placeholder = st.empty()
-    
-    # ⭐️ 1. "생각 중" 문구 노출
     placeholder.markdown('<div class="thinking-text">지현이가 답변을 생각하고 있어요... 💭</div>', unsafe_allow_html=True)
     
-    # ⭐️ 2. 5초간 의도적 지연 (Labor Illusion 강화)
-    time.sleep(5.0) 
+    # ⭐️ 딜레이 차별화 로직
+    if 1 <= st.session_state.scenario_stage <= 3:
+        time.sleep(5.0) # 시나리오 답변은 5초 대기
+    else:
+        time.sleep(1.5) # 일반 답변은 1.5초 대기
     
     full_response = ""
     try:
@@ -144,7 +120,7 @@ if st.session_state.generating:
             for char in target_text:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
-                time.sleep(0.01)
+                time.sleep(0.03) # ⭐️ 스트리밍 속도 0.03초로 수정
         else:
             system_instruction = "너의 이름은 '지현'이야. 대학생 과제 도우미 학습 메이트야. 반드시 정중한 존댓말만 사용하고, 모든 답변에 이모티콘을 2개 이상 섞어줘."
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
@@ -153,7 +129,8 @@ if st.session_state.generating:
                 for char in chunk.text:
                     full_response += char
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
-                    time.sleep(0.005)
+                    time.sleep(0.03) # ⭐️ 일반 답변 스트리밍 속도도 0.03초로 통일
+        
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
         st.rerun()
