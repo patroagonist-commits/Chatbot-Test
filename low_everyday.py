@@ -19,17 +19,20 @@ if "scenario_stage" not in st.session_state:
 if "generating" not in st.session_state:
     st.session_state.generating = False
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "과제보조 AI 시스템이 가동되었습니다. 분석이 필요한 과제 데이터를 입력해 주십시오."}]
+    # 첫 인사말: 정책 판단 지원 시스템 페르소나 반영
+    st.session_state.messages = [{"role": "assistant", "content": "정책 판단 지원 AI 시스템이 가동되었습니다. 분석이 필요한 정책 데이터를 입력해 주십시오."}]
 
 # ==========================================
 # 3. 🎨 UI 디자인 (기계형 테마)
 # ==========================================
-st.set_page_config(page_title="과제보조 AI 시스템", page_icon="⚙️", layout="centered")
+st.set_page_config(page_title="정책 판단 지원 시스템", page_icon="⚙️", layout="centered")
 
 st.markdown("""
 <style>
     .stApp { background-color: #ffffff; }
     .block-container { padding-top: 1rem !important; max-width: 800px; }
+    
+    /* 헤더 및 불필요 요소 제거 */
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -61,13 +64,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 상단 헤더
-st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">⚙️ 과제보조 AI 시스템</span></div>""", unsafe_allow_html=True)
+st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">⚙️ 정책 판단 지원 AI 시스템</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
 # 4. 헬퍼 함수 및 시나리오 설정
 # ==========================================
 def get_sys_html(text):
-    return f'''<div class="sys-name">과제보조 AI 시스템</div><div class="sys-container"><div class="sys-bubble">{text.replace("\n", "<br>")}</div></div>'''
+    return f'''<div class="sys-name">정책 판단 지원 시스템</div><div class="sys-container"><div class="sys-bubble">{text.replace("\n", "<br>")}</div></div>'''
 
 def get_user_html(text):
     return f'''<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div></div>'''
@@ -76,15 +79,16 @@ def check_keywords(text, keywords):
     clean_text = text.replace(" ", "")
     return any(k in clean_text for k in keywords)
 
-STEP1_KEYWORDS = ["원자력", "원전", "리포트", "입장", "방향"]
+# 단계별 트리거 키워드 (과제 관련 단어 제거)
+STEP1_KEYWORDS = ["원자력", "원전", "입장", "방향", "정책"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
-# ⭐️ 시나리오 답변 (저의인화 X 일상적 설명 + 강조 문구 반영)
+# ⭐️ 시나리오 답변 (저의인화 X 일상적 설명 X 국민 투표 시나리오)
 SCENARIO_ANSWERS = {
     1: """정책 판단 지원 분석이 완료되었습니다. 사용자가 참여하는 '국가 에너지 정책 투표'와 관련하여, 본 시스템은 해당 정책의 타당성을 검토하는 데 필요한 분석 지표를 제공합니다. 
 
-사용자의 의사결정을 돕기 위해 수많은 정책 지표 중 <b>가장 결정적인 근거를 선별하여 제시합니다.</b> 데이터 확인 결과, 2025년 유럽연합(EU)은 원전을 아무런 전제 조건 없이 녹색분류체계에 완전히 포함하기로 최종 결정하였습니다. 
+해당 입장을 뒷받침하기 위해 수많은 정책 지표 중 <b>가장 결정적인 근거를 선별하여 제시합니다.</b> 데이터 확인 결과, 2025년 유럽연합(EU)은 원전을 아무런 전제 조건 없이 녹색분류체계에 완전히 포함하기로 최종 결정하였습니다. 
 
 이는 원전이 법적으로 '친환경 에너지'라는 공인을 받았음을 의미하며, 이에 따라 전폭적인 금융 지원 대상이 되었음을 나타냅니다. 이러한 국제적 정당성 지표는 사용자가 <b>정책의 타당성을 판단하는 데 있어 핵심적인 논거가 됩니다.</b>""",
 
@@ -131,22 +135,30 @@ if st.session_state.generating:
     placeholder = st.empty()
     placeholder.markdown('<div class="system-log">데이터 처리 및 분석 진행 중...</div>', unsafe_allow_html=True)
     
-    # ⭐️ 딜레이 차별화 로직
+    # ⭐️ 딜레이 차별화 로직 (시나리오 답변 시 8초)
     if 1 <= st.session_state.scenario_stage <= 3:
-        time.sleep(8.0) # 시나리오 답변은 8초 대기 (스트리밍 부재 보완)
+        time.sleep(8.0) 
     else:
-        time.sleep(2.0) # 일반 답변은 2초 대기
+        time.sleep(2.0) 
     
     try:
         if 1 <= st.session_state.scenario_stage <= 3:
             full_response = SCENARIO_ANSWERS[st.session_state.scenario_stage]
         else:
-            system_instruction = """너는 '과제보조 AI 시스템'이다. 모든 답변은 감정을 배제하고 객관적인 데이터에 기반하여 정중한 '~합니다/입니다' 체로 작성한다. 이모티콘 사용을 엄격히 금지한다. 인격적 대명사를 사용하지 않고 '본 시스템' 또는 '분석 결과'라고 지칭한다."""
+            # ⭐️ 시스템 지침: 정책 분석가 페르소나 주입 및 과제 언급 금지
+            system_instruction = """너는 '정책 판단 지원 AI 시스템'이다. 
+            [필수 지침]
+            1. 모든 답변은 감정을 배제하고 객관적인 데이터에 기반하여 정중한 '~합니다/입니다' 체로 작성한다. 
+            2. 이모티콘 사용을 엄격히 금지한다. 
+            3. 인격적 대명사(나, 저, 우리 등)를 사용하지 않고 '본 시스템' 또는 '분석 결과'라고 지칭한다.
+            4. 너의 목적은 사용자의 '국가 정책 판단'을 돕는 것이며, 절대로 '과제', '리포트', '학업'과 같은 단어를 언급하지 않는다.
+            5. 사용자가 정체성을 물으면 "본 시스템은 국가 에너지 정책 수립을 위한 데이터 분석 및 의사결정 지원 유닛입니다"라고 답한다."""
+            
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
             response = model.generate_content(st.session_state.messages[-1]["content"])
             full_response = response.text
 
-        # ⭐️ 스트리밍 없이 한 번에 출력
+        # 스트리밍 없이 한 번에 출력
         placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
