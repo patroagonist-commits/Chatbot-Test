@@ -116,7 +116,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 5. 대화 로직 (부분 스트리밍 적용)
+# 5. 대화 로직 (가변 속도 스트리밍 적용)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -155,14 +155,16 @@ if st.session_state.generating:
         if 1 <= st.session_state.scenario_stage <= 3:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             
-            # ⭐️ 정규표현식으로 인용 박스 구간 분리
+            # ⭐️ 인용 박스 구간 분리
             parts = re.split(r'(<div class="citation-box">.*?</div>)', target_text, flags=re.DOTALL)
             
             for part in parts:
                 if part.startswith('<div class="citation-box">'):
-                    # 인용 박스는 스트리밍 없이 한 번에 추가
-                    full_response += part
-                    placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
+                    # ⭐️ 인용 박스 구간은 초고속(0.001초) 스트리밍
+                    for char in part:
+                        full_response += char
+                        placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
+                        time.sleep(0.001)
                 else:
                     # 일반 텍스트는 0.03초 간격으로 스트리밍
                     for char in part:
