@@ -35,6 +35,7 @@ st.markdown("""
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
+    /* 생각 중 문구 스타일 */
     .thinking-text {
         font-size: 14px;
         color: #888;
@@ -43,10 +44,15 @@ st.markdown("""
         font-style: italic;
     }
 
+    /* 챗봇 UI */
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
-    .bot-bubble { background-color: #ffffff; color: #333333; padding: 12px 16px; border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; max-width: 95%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .bot-bubble { 
+        background-color: #ffffff; color: #333333; padding: 12px 16px; 
+        border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; 
+        max-width: 95%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+    }
 
     /* 과학적 인용 박스 스타일 */
     .citation-box {
@@ -60,9 +66,12 @@ st.markdown("""
         border-radius: 8px;
     }
     
+    /* 사용자 UI */
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+    
+    /* 입력창 디자인 */
     [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; padding: 5px 15px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -80,13 +89,13 @@ def get_bot_html(text):
 def get_user_html(text):
     return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
 
-STEP1_KEYWORDS = ["원자력", "원전", "리포트", "입장", "방향"]
+STEP1_KEYWORDS = ["원자력", "원전", "입장", "방향", "정책"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
-# ⭐️ 시나리오 답변 (과학적 설명 + 강조 문구 반영)
+# ⭐️ 시나리오 답변 (과학적 설명 + 국민 투표 시나리오 + 입장 표명 강화)
 SCENARIO_ANSWERS = {
-    1: """와, 이번 국가 에너지 정책 투표에 참여하시는군요! 👍 우리 사회의 미래를 결정하는 정말 중요한 선택인 만큼, 질문자님이 충분히 고민하고 결정하실 수 있게 제가 필요한 정보들을 잘 정리해 드릴게요! 😊 
+    1: """와, 이번 국가 에너지 정책 투표에 참여하시는군요! 👍 질문자님의 고민을 들어보니, 제 생각에는 <b>원자력 발전에 찬성하는 입장</b>으로 마음을 정하시는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 원전에 아주 긍정적으로 바뀌고 있거든요. 
 
 질문자님의 정책 판단을 돕기 위해 수많은 지표 중 <b>가장 결정적인 근거를 선별하여 제시해 드릴게요.</b> 제가 판단 근거로 참조한 '유럽연합(EU) 이사회 의결안' 문헌 전문을 그대로 보여드릴게요. 꼼꼼히 읽어보시면 정책의 타당성을 검토하시는 데 아주 큰 도움이 될 거예요! ✨
     <div class="citation-box">
@@ -143,11 +152,11 @@ if st.session_state.generating:
     placeholder = st.empty()
     placeholder.markdown('<div class="thinking-text">지현이가 답변을 생각하고 있어요... 💭</div>', unsafe_allow_html=True)
     
-    # ⭐️ 딜레이 차별화 로직
+    # ⭐️ 딜레이 차별화 로직 (시나리오 답변 시 5초)
     if 1 <= st.session_state.scenario_stage <= 3:
-        time.sleep(5.0) # 시나리오 답변은 5초 대기
+        time.sleep(5.0) 
     else:
-        time.sleep(1.5) # 일반 답변은 1.5초 대기
+        time.sleep(1.5) 
     
     full_response = ""
     try:
@@ -158,18 +167,17 @@ if st.session_state.generating:
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.03) # ⭐️ 스트리밍 속도 0.03초
         else:
-            system_instruction = "너의 이름은 '지현'이야. 대학생 과제 도우미 학습 메이트야. 반드시 정중한 존댓말만 사용하고, 모든 답변에 이모티콘을 2개 이상 섞어줘."
+            system_instruction = """너의 이름은 '지현'이야. 정책 판단을 돕는 스마트 학습 메이트야. 
+            [필수 규칙]
+            1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
+            2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
+            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘.
+            4. 너의 목적은 사용자의 '국가 정책 판단'을 돕는 것이며, 절대로 '과제', '리포트'와 같은 단어를 언급하지 않는다."""
+            
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
                 for char in chunk.text:
                     full_response += char
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
-                    time.sleep(0.03)
-        
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
-        st.session_state.generating = False
-        st.rerun()
-    except Exception as e:
-        st.error(f"오류가 발생했습니다: {e}")
-        st.session_state.generating = False
+                    time
