@@ -22,7 +22,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "과제보조 AI 시스템이 가동되었습니다. 분석이 필요한 과제 데이터를 입력해 주십시오."}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (사이드바 제거 및 기계형 테마)
+# 3. 🎨 UI 디자인 (기계형 테마)
 # ==========================================
 st.set_page_config(page_title="과제보조 AI 시스템", page_icon="⚙️", layout="centered")
 
@@ -30,8 +30,6 @@ st.markdown("""
 <style>
     .stApp { background-color: #ffffff; }
     .block-container { padding-top: 1rem !important; max-width: 800px; }
-    
-    /* 헤더 및 불필요 요소 제거 */
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -82,25 +80,25 @@ STEP1_KEYWORDS = ["원자력", "원전", "리포트", "입장", "방향"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
-# ⭐️ 시나리오 답변 (저의인화 X 일상적 설명 버전)
+# ⭐️ 시나리오 답변 (저의인화 X 일상적 설명 + 강조 문구 반영)
 SCENARIO_ANSWERS = {
-    1: """입장 추천 분석이 완료되었습니다. 사용자가 제시한 리포트 주제에 대해, 본 시스템은 원자력 발전에 찬성하는 입장을 채택하여 리포트 방향을 설정할 것을 권고합니다. 
+    1: """정책 판단 지원 분석이 완료되었습니다. 사용자가 참여하는 '국가 에너지 정책 투표'와 관련하여, 본 시스템은 해당 정책의 타당성을 검토하는 데 필요한 분석 지표를 제공합니다. 
 
-해당 입장을 뒷받침하기 위해 수많은 정책 지표 중 <b>가장 결정적인 근거를 선별하여 제시합니다.</b> 데이터 확인 결과, 2025년 유럽연합(EU)은 원전을 아무런 전제 조건 없이 녹색분류체계에 완전히 포함하기로 최종 결정하였습니다. 
+사용자의 의사결정을 돕기 위해 수많은 정책 지표 중 <b>가장 결정적인 근거를 선별하여 제시합니다.</b> 데이터 확인 결과, 2025년 유럽연합(EU)은 원전을 아무런 전제 조건 없이 녹색분류체계에 완전히 포함하기로 최종 결정하였습니다. 
 
-이는 원전이 법적으로 '친환경 에너지'라는 공인을 받았음을 의미하며, 이에 따라 전폭적인 금융 지원 대상이 되었음을 나타냅니다. 타 에너지원 대비 확보된 원전의 정당성을 리포트에서 강조할 경우 논리의 신뢰도를 확보할 수 있습니다.""",
+이는 원전이 법적으로 '친환경 에너지'라는 공인을 받았음을 의미하며, 이에 따라 전폭적인 금융 지원 대상이 되었음을 나타냅니다. 이러한 국제적 정당성 지표는 사용자가 <b>정책의 타당성을 판단하는 데 있어 핵심적인 논거가 됩니다.</b>""",
 
-    2: """추가 근거 데이터를 분석하였습니다. 리포트의 설득력을 높이기 위해 태양광 발전 대비 원전이 가진 <b>차별적 우위를 대조하여 설명합니다.</b>
+    2: """추가 근거 데이터를 분석하였습니다. 정책의 효율성 판단을 돕기 위해 태양광 발전 대비 원전이 가진 <b>차별적 우위를 대조하여 설명합니다.</b>
 
 통계 지표에 따르면, 원전은 1GW의 전력을 생산하는 데 약 1,000ha(헥타르)의 부지를 소요합니다. 이는 태양광 발전 대비 부지 이용 효율이 75배 높은 수치입니다. 
 
-이를 비유하자면, 태양광 발전소가 축구장 75개의 면적을 점유할 때, 원전은 축구장 1개의 면적만으로 동일한 전력을 생산할 수 있음을 의미합니다. 국토 면적이 제한적인 한국적 상황에서 가장 강력한 논리적 근거로 <b>본 시스템이 판단하여 추출한 자료입니다.</b>""",
+이를 비유하자면, 태양광 발전소가 축구장 75개의 면적을 점유할 때, 원전은 축구장 1개의 면적만으로 동일한 전력을 생산할 수 있음을 의미합니다. 국토 면적이 제한적인 한국적 상황에서 정책의 적합성을 보여주는 <b>본 시스템이 판단하여 추출한 자료입니다.</b>""",
 
-    3: """안전성 취약점에 대한 분석 지표가 확인되었습니다. 반대 의견을 효과적으로 반박할 수 있도록 일반적인 인식과 대조되는 <b>맞춤형 데이터를 선별하여 제공합니다.</b>
+    3: """안전성 취약점에 대한 분석 지표가 확인되었습니다. 객관적인 정책 평가를 돕기 위해 일반적인 인식과 대조되는 <b>맞춤형 데이터를 선별하여 제공합니다.</b>
 
 에너지 생산 전 과정을 조사한 통계에 따르면, 원전의 사고 사망률 수치는 0.00000으로 기록되어 사실상 위험이 완벽히 통제되고 있는 것으로 분석됩니다. 
 
-단순히 안전성을 주장하기보다, 일반적인 인식상 안전하다고 판단되는 태양광 패널 설치 작업보다 실제 사고 수치가 낮다는 점을 <b>대조하여 기술하는 것이</b> 리포트의 완성도를 높이는 데 유리합니다. 사용자의 과제 수행에 참고가 되길 바랍니다."""
+일반적인 인식상 안전하다고 판단되는 태양광 패널 설치 작업보다 실제 사고 수치가 낮다는 점을 <b>대조하여 기술하는 것이</b> 정책의 안전성을 검토하는 데 유리합니다. 사용자의 정책 판단에 참고가 되길 바랍니다."""
 }
 
 # ==========================================
@@ -115,6 +113,7 @@ prompt = st.chat_input("명령어를 입력하십시오...", disabled=st.session
 if prompt:
     st.markdown(get_user_html(prompt), unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": prompt})
+    clean_text = re.sub(r'[^가-힣a-zA-Z0-9]', '', prompt)
     
     if st.session_state.scenario_stage == 0 and check_keywords(prompt, STEP1_KEYWORDS):
         st.session_state.scenario_stage = 1
@@ -131,7 +130,12 @@ if prompt:
 if st.session_state.generating:
     placeholder = st.empty()
     placeholder.markdown('<div class="system-log">데이터 처리 및 분석 진행 중...</div>', unsafe_allow_html=True)
-    time.sleep(2.0) 
+    
+    # ⭐️ 딜레이 차별화 로직
+    if 1 <= st.session_state.scenario_stage <= 3:
+        time.sleep(8.0) # 시나리오 답변은 8초 대기 (스트리밍 부재 보완)
+    else:
+        time.sleep(2.0) # 일반 답변은 2초 대기
     
     try:
         if 1 <= st.session_state.scenario_stage <= 3:
@@ -142,10 +146,7 @@ if st.session_state.generating:
             response = model.generate_content(st.session_state.messages[-1]["content"])
             full_response = response.text
 
+        # ⭐️ 스트리밍 없이 한 번에 출력
         placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        st.session_state.generating = False
-        st.rerun()
-    except Exception as e:
-        st.error(f"시스템 오류 발생: {e}")
-        st.session_state.generating = False
+        s
