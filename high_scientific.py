@@ -180,4 +180,11 @@ if st.session_state.generating:
                 for char in chunk.text:
                     full_response += char
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
-                    time
+                    time.sleep(0.03)
+        
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.session_state.generating = False
+        st.rerun()
+    except Exception as e:
+        st.error(f"오류가 발생했습니다: {e}")
+        st.session_state.generating = False
