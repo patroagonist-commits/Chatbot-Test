@@ -155,16 +155,16 @@ if st.session_state.generating:
         if 1 <= st.session_state.scenario_stage <= 3:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             
-            # ⭐️ 인용 박스 구간 분리
+            # 인용 박스 구간 분리
             parts = re.split(r'(<div class="citation-box">.*?</div>)', target_text, flags=re.DOTALL)
             
             for part in parts:
                 if part.startswith('<div class="citation-box">'):
-                    # ⭐️ 인용 박스 구간은 초고속(0.001초) 스트리밍
+                    # ⭐️ 인용 박스 구간은 고속(0.01초) 스트리밍
                     for char in part:
                         full_response += char
                         placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
-                        time.sleep(0.001)
+                        time.sleep(0.01)
                 else:
                     # 일반 텍스트는 0.03초 간격으로 스트리밍
                     for char in part:
