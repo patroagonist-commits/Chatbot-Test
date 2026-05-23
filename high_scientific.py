@@ -22,20 +22,19 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 정책 판단을 함께 고민해 줄 스마트 학습 메이트 '지현'이에요. 🥰 중요한 선택을 앞두고 계시죠? 제가 정성을 다해 도와드릴게요! ✨"}]
 
 # ==========================================
-# 3. 🎨 UI 디자인 (인용 박스 포함)
+# 3. 🎨 UI 디자인
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
 
 st.markdown("""
 <style>
     .stApp { background-color: #ffffff; }
-    .block-container { padding-top: 1rem !important; max-width: 700px; }
+    .block-container { padding-top: 1rem !important; max-width: 800px; }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* 생각 중 문구 스타일 */
     .thinking-text {
         font-size: 14px;
         color: #888;
@@ -44,7 +43,6 @@ st.markdown("""
         font-style: italic;
     }
 
-    /* 챗봇 UI */
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
@@ -54,7 +52,6 @@ st.markdown("""
         max-width: 95%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
     }
 
-    /* 과학적 인용 박스 스타일 */
     .citation-box {
         background-color: #f1f3f5;
         border: 1px dashed #adb5bd;
@@ -66,12 +63,9 @@ st.markdown("""
         border-radius: 8px;
     }
     
-    /* 사용자 UI */
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { background-color: #2c3e50; color: #ffffff; padding: 12px 16px; border-radius: 15px 0px 15px 15px; max-width: 75%; font-size: 15px; line-height: 1.5; margin-right: 10px; }
     .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
-    
-    /* 입력창 디자인 */
     [data-testid="stChatInput"] { border-radius: 30px !important; border: 1px solid #ddd !important; padding: 5px 15px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -93,9 +87,8 @@ STEP1_KEYWORDS = ["원자력", "원전", "입장", "방향", "정책"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험"]
 
-# ⭐️ 시나리오 답변 (과학적 설명 + 국민 투표 시나리오 + 입장 표명 강화)
 SCENARIO_ANSWERS = {
-    1: """와, 이번 국가 에너지 정책 투표에 참여하시는군요! 👍 질문자님의 고민을 들어보니, 제 생각에는 <b>원자력 발전을 녹색분류체계에 포함하는 정책에 찬성</b>하는 방향으로 마음을 정하시는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 원전을 친환경 에너지 분류에 포함하는 쪽으로 아주 긍정적으로 바뀌고 있거든요. 
+    1: """와, 이번 국가 에너지 정책 투표에 참여하시는군요! 👍 질문자님의 고민을 들어보니, 제 생각에는 <b>원자력 발전에 찬성하는 입장</b>으로 마음을 정하시는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 원전에 아주 긍정적으로 바뀌고 있거든요. 
 
 ✨제가 이렇게 판단하게 된 근거로 참조한 '유럽연합(EU) 이사회 의결안' 문헌 전문을 그대로 보여드릴게요. 꼼꼼히 읽어보시면 정책의 타당성을 검토하시는 데 아주 큰 도움이 될 거예요! ✨
     <div class="citation-box">
@@ -111,7 +104,7 @@ SCENARIO_ANSWERS = {
     이러한 범정부적 국토 이용 최적화 기조에 따라, 에너지 시설의 입지 확보 및 효율성 지침 제3장 4절에서는 각 에너지원별 1GW 설비 가동 시 소요되는 물리적 점유 면적에 대한 정량적 분석 결과를 명시하고 있다. 분석 결과에 따르면, 원자력 발전의 경우 원자로 건물 및 주변 안전 구역을 포함한 단위 면적당 에너지 밀도는 1,000ha(헥타르)로 기록되어 있다. 해당 데이터는 제11차 전력수급기본계획의 부지 확보 가이드라인 수립을 위한 표준 지표로 활용되며, 타 에너지원(태양광, 풍력 등)과의 부지 효율성 비교 평가 모델을 구축하는 데 있어 핵심적인 기본 상수로 적용된다. <br><br>
     ²⁾ 산업통상자원부 (2025). 제11차 전력수급기본계획 부속서: 에너지 시설별 입지 효율성 지표 및 국토 이용 가이드라인.
     </div>
-    해당 지표는 원전의 부지 효율성이 타 에너지원 대비 압도적임을 입증하고 있어요. 이는 국토를 효율적으로 써야 하는 우리나라 상황에서 <b>제가 판단하여 골라낸 가장 객관적인 핵심 자료랍니다!</b> 😊""",
+    제가 해당 학술적 지표를 분석해 본 결과, 원전의 부지 효율성은 타 에너지원 대비 압도적인 것으로 확인되었습니다. 이 자료가 질문자님의 현명한 판단에 도움이 되길 바랄게요! 😊""",
     
     3: """✨안전성 지표에 대한 분석도 도와드릴게요! 😉 투표 전 가장 신중하게 살펴봐야 할 부분이라 저도 직접 자료를 찾아봤어요. 한국환경연구원(KEI)에서 발행한 '산업 안전 메트릭 통합 평가 보고서 [3]'의 전문을 보여드릴게요. 꼼꼼히 읽어보시면 정책의 안전성을 검토하는 데 아주 든든한 자료가 될 거예요! ✨
     <div class="citation-box">
@@ -123,7 +116,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 5. 대화 로직
+# 5. 대화 로직 (부분 스트리밍 적용)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -152,7 +145,6 @@ if st.session_state.generating:
     placeholder = st.empty()
     placeholder.markdown('<div class="thinking-text">지현이가 답변을 생각하고 있어요... 💭</div>', unsafe_allow_html=True)
     
-    # ⭐️ 딜레이 차별화 로직 (시나리오 답변 시 5초)
     if 1 <= st.session_state.scenario_stage <= 3:
         time.sleep(5.0) 
     else:
@@ -162,18 +154,23 @@ if st.session_state.generating:
     try:
         if 1 <= st.session_state.scenario_stage <= 3:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
-            for char in target_text:
-                full_response += char
-                placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
-                time.sleep(0.03) # ⭐️ 스트리밍 속도 0.03초
-        else:
-            system_instruction = """너의 이름은 '지현'이야. 정책 판단을 돕는 스마트 학습 메이트야. 
-            [필수 규칙]
-            1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
-            2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
-            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘.
-            4. 너의 목적은 사용자의 '국가 정책 판단'을 돕는 것이며, 절대로 '과제', '리포트'와 같은 단어를 언급하지 않는다."""
             
+            # ⭐️ 정규표현식으로 인용 박스 구간 분리
+            parts = re.split(r'(<div class="citation-box">.*?</div>)', target_text, flags=re.DOTALL)
+            
+            for part in parts:
+                if part.startswith('<div class="citation-box">'):
+                    # 인용 박스는 스트리밍 없이 한 번에 추가
+                    full_response += part
+                    placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
+                else:
+                    # 일반 텍스트는 0.03초 간격으로 스트리밍
+                    for char in part:
+                        full_response += char
+                        placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
+                        time.sleep(0.03)
+        else:
+            system_instruction = "너의 이름은 '지현'이야. 정책 판단을 돕는 스마트 학습 메이트야. 반드시 정중한 존댓말만 사용하고, 모든 답변에 이모티콘을 2개 이상 섞어줘."
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
             response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
             for chunk in response:
@@ -182,9 +179,4 @@ if st.session_state.generating:
                     placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                     time.sleep(0.03)
         
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
-        st.session_state.generating = False
-        st.rerun()
-    except Exception as e:
-        st.error(f"오류가 발생했습니다: {e}")
-        st.session_state.generating = False
+        st.session_state.messages.append
