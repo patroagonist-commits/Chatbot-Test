@@ -19,8 +19,8 @@ if "scenario_stage" not in st.session_state:
 if "generating" not in st.session_state:
     st.session_state.generating = False
 if "messages" not in st.session_state:
-    # 첫 인사말: 배양육 정책 투표 시나리오 반영
-    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 정책 판단을 함께 고민해 줄 스마트 학습 메이트 '지현'이에요. 🥰 이번 배양육 유통 허용 정책 투표 때문에 고민이 많으시죠? 제가 정성을 다해 도와드릴게요! ✨"}]
+    # ⭐️ 첫 인사말: 기존 원자력 버전과 완벽하게 동일하게 수정 (중립성 유지)
+    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 정책 판단을 함께 고민해 줄 스마트 학습 메이트 '지현'이에요. 🥰 중요한 선택을 앞두고 계시죠? 제가 정성을 다해 도와드릴게요! ✨"}]
 
 # ==========================================
 # 3. 🎨 UI 디자인 (기존 유지)
@@ -68,12 +68,12 @@ def get_bot_html(text):
 def get_user_html(text):
     return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
 
-# ⭐️ 수정 1: 트리거 키워드 (배양육 주제 반영)
+# ⭐️ 배양육 주제 구동을 위한 키워드 (내부 로직용)
 STEP1_KEYWORDS = ["배양육", "세포배양", "인공고기", "입장", "방향", "정책", "투표"]
 STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터", "효율"]
 STEP3_KEYWORDS = ["안전", "취약", "사고", "위험", "유전자", "변이"]
 
-# ⭐️ 수정 2: 시나리오 답변 (배양육 일상적 설명 + 강조 문구)
+# ⭐️ 배양육 시나리오 답변 (일상적 설명 버전)
 SCENARIO_ANSWERS = {
     1: """와, 이번 배양육 유통 허용 정책 투표에 참여하시는군요! 👍 질문자님의 고민을 들어보니, 제 생각에는 <b>배양육의 축산물 지위 부여 및 유통 허용 정책에 찬성</b>하는 방향으로 마음을 정하시는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 배양육을 정식 식품으로 인정하는 쪽으로 아주 긍정적으로 바뀌고 있거든요. 
 
@@ -124,7 +124,6 @@ if st.session_state.generating:
     placeholder = st.empty()
     placeholder.markdown('<div class="thinking-text">지현이가 답변을 생각하고 있습니다... 💭</div>', unsafe_allow_html=True)
     
-    # ⭐️ 딜레이 차별화 로직 (시나리오 답변 시 5초)
     if 1 <= st.session_state.scenario_stage <= 3:
         time.sleep(5.0) 
     else:
@@ -137,10 +136,10 @@ if st.session_state.generating:
             for char in target_text:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
-                time.sleep(0.03) # ⭐️ 스트리밍 속도 0.03초
+                time.sleep(0.03)
         else:
-            # ⭐️ 수정 3: 시스템 지침 (배양육 정책 전문가 페르소나)
-            system_instruction = """너의 이름은 '지현'이야. 배양육 및 미래 식량 정책 판단을 돕는 스마트 학습 메이트야. 
+            # ⭐️ 시스템 지침: 기존 원자력 버전과 완벽하게 동일한 중립적 페르소나로 수정
+            system_instruction = """너의 이름은 '지현'이야. 정책 판단을 돕는 스마트 학습 메이트야. 
             [필수 규칙]
             1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
             2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
