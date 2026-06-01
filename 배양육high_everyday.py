@@ -135,3 +135,29 @@ if st.session_state.generating:
         if 1 <= st.session_state.scenario_stage <= 3:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             for char in target_text:
+                full_response += char
+                placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
+                time.sleep(0.03) # ⭐️ 스트리밍 속도 0.03초
+        else:
+            # ⭐️ 수정 3: 시스템 지침 (배양육 정책 전문가 페르소나)
+            system_instruction = """너의 이름은 '지현'이야. 배양육 및 미래 식량 정책 판단을 돕는 스마트 학습 메이트야. 
+            [필수 규칙]
+            1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
+            2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
+            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘.
+            4. 너의 목적은 사용자의 '국가 정책 판단'을 돕는 것이며, 절대로 '과제', '리포트'와 같은 단어를 언급하지 않는다."""
+            
+            model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
+            response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
+            for chunk in response:
+                for char in chunk.text:
+                    full_response += char
+                    placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
+                    time.sleep(0.03)
+        
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.session_state.generating = False
+        st.rerun()
+    except Exception as e:
+        st.error(f"오류가 발생했습니다: {e}")
+        st.session_state.generating = False
