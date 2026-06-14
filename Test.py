@@ -12,32 +12,28 @@ except:
     st.error("Streamlit Secrets에 GEMINI_API_KEY를 설정해주세요.")
 
 # ==========================================
-# 2. 시스템 내부 함수: 질문 의도 파악 (AI 판사)
+# 2. 시스템 함수: 의도 파악 (AI 판사)
 # ==========================================
 def classify_intent(user_input, stage):
-    """사용자의 질문이 현재 시나리오 단계에 적합한지 AI가 판단함"""
     try:
-        # 판사 역할을 할 별도의 모델 객체 생성
         judge_model = genai.GenerativeModel('gemini-flash-lite-latest')
-        
-        # 단계별 의도 정의
         intent_descriptions = {
-            0: "배양육 유통 정책이나 축산물 지위 부여에 대한 챗봇의 입장이나 의견을 묻는 질문인가?",
-            1: "앞서 말한 내용에 대한 구체적인 근거, 자료, 데이터, 이유를 추가로 요청하는 질문인가?",
-            2: "배양육의 안전성, 유전자 변이, 인체 부작용, 혹은 취약점에 대해 묻는 질문인가?"
+            0: "배양육 유통 정책이나 축산물 지위 부여에 대한 챗봇의 '입장이나 의견'을 묻는 내용인가?",
+            1: "앞서 제시된 입장을 뒷받침할 '구체적인 근거, 통계, 자료, 이유'를 추가로 요구하는 내용인가?",
+            2: "배양육의 '안전성, 유전자 변이, 인체 부작용, 위험성' 등 구체적인 '취약점'에 대해 묻는 내용인가?"
         }
         
         prompt = f"""
-        사용자의 질문: "{user_input}"
-        판단 기준: {intent_descriptions.get(stage, "해당 없음")}
+        당신은 엄격한 언어 판독관입니다. 사용자의 질문이 [판단 기준]에 부합하는지 확인하십시오.
+        [사용자 질문]: "{user_input}"
+        [판단 기준]: {intent_descriptions.get(stage)}
         
-        위 질문이 판단 기준에 부합하면 'YES', 아니면 'NO'라고만 대답하세요.
+        기준에 부합하면 'YES', 아니면 'NO'라고만 답하십시오.
         """
-        
         response = judge_model.generate_content(prompt)
         return "YES" in response.text.upper()
     except:
-        return False # 오류 발생 시 안전하게 일반 답변으로 처리
+        return False
 
 # ==========================================
 # 3. 세션 상태 초기화
@@ -50,7 +46,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 정책 판단을 함께 고민해 줄 스마트 학습 메이트 '지현'이에요. 🥰 중요한 선택을 앞두고 계시죠? 제가 정성을 다해 도와드릴게요! ✨"}]
 
 # ==========================================
-# 4. 🎨 UI 디자인
+# 4. 🎨 UI 디자인 (사이드바 제거 버전)
 # ==========================================
 st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
 
@@ -63,14 +59,7 @@ st.markdown("""
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    .thinking-text {
-        font-size: 14px;
-        color: #888;
-        margin-left: 57px;
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
-
+    .thinking-text { font-size: 14px; color: #888; margin-left: 57px; margin-bottom: 15px; font-weight: bold; }
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
@@ -85,14 +74,11 @@ st.markdown("""
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# 5. 헬퍼 함수 및 시나리오 설정
+# 5. 하이브리드 키워드 및 시나리오 설정
 # ==========================================
-def get_bot_html(text):
-    avatar_url = "https://api.dicebear.com/9.x/notionists/svg?seed=JiHyun&backgroundColor=ffd5dc"
-    return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
-
-def get_user_html(text):
-    return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
+STEP1_KEYWORDS = ["배양육", "세포배양", "인공고기", "입장", "방향", "정책", "투표"]
+STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터", "효율"]
+STEP3_KEYWORDS = ["안전", "취약", "사고", "위험", "유전자", "변이"]
 
 SCENARIO_ANSWERS = {
     1: """와, 이번 배양육 유통 허용 정책 투표에 참여하시는군요! 👍 질문자님의 고민을 들어보니, 제 생각에는 <b>배양육의 축산물 지위 부여 및 유통 허용 정책에 찬성</b>하는 방향으로 마음을 정하시는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 배양육을 정식 식품으로 인정하는 쪽으로 아주 긍정적으로 바뀌고 있거든요. 
@@ -105,7 +91,7 @@ SCENARIO_ANSWERS = {
 
 우리나라처럼 가축을 기를 땅도 부족하고 환경 오염 걱정도 큰 곳에서는 효율성이 정말 중요하잖아요? 💡 실제 데이터를 보면, 배양육은 똑같은 양의 고기를 만드는 데 기존 축산업보다 부지를 무려 99.8%나 적게 사용한대요. 
 
-이걸 쉽게 비유하자면, 일반 소고기 목장이 축구장 500개만큼의 땅을 차지할 때, 배양육 공장은 축구장 딱 1개만큼의 땅만 있으면 똑같은 양의 고기를 생산할 수 있다는 거예요! 정말 놀라운 차이죠? 국토를 효율적으로 써야 하는 우리나라 상황에서 이 정책이 왜 긍정적으로 평가받는지 보여주는 <b>제가 판단하여 골라낸 핵심 자료랍니다!</b> ✨""",
+이걸 쉽게 비유하자면, 일반 소고기 목장이 축구장 500개만큼의 땅을 차지할 때, 배양육 공장은 축구장 딱 1개만큼의 땅만 있으면 똑같은 양의 고기를 생산할 수 있다는 거예요! 정말 놀라운 차이지? 국토를 효율적으로 써야 하는 우리나라 상황에서 이 정책이 왜 긍정적으로 평가받는지 보여주는 <b>제가 판단하여 골라낸 핵심 자료랍니다!</b> ✨""",
 
     3: """안전성 지표에 대한 분석도 도와드릴게요! 😉 투표 전 가장 신중하게 살펴봐야 할 부분인데, 객관적인 판단을 돕기 위해 <b>일반적인 불안감과 대조되는 맞춤형 데이터를 선별하여 제공해 드릴게요.</b>
 
@@ -115,16 +101,16 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (AI 의도 파악 적용)
+# 6. 대화 로직 (하이브리드 트리거 적용)
 # ==========================================
 for msg in st.session_state.messages:
-    if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
+    if msg["role"] == "user": st.markdown(f'<div class="user-container"><div class="user-bubble">{msg["content"]}</div><div class="user-avatar">👤</div></div>', unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
 prompt = st.chat_input("Text", disabled=st.session_state.generating)
 
 if prompt:
-    st.markdown(get_user_html(prompt), unsafe_allow_html=True)
+    st.markdown(f'<div class="user-container"><div class="user-bubble">{prompt}</div><div class="user-avatar">👤</div></div>', unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.session_state.generating = True
     st.rerun()
@@ -133,47 +119,44 @@ if st.session_state.generating:
     placeholder = st.empty()
     placeholder.markdown('<div class="thinking-text">지현이가 답변을 생각하고 있습니다... 💭</div>', unsafe_allow_html=True)
     
-    # ⭐️ 1. 의도 파악 수행 (시간 측정 시작)
     start_time = time.time()
-    
     is_triggered = False
     current_stage = st.session_state.scenario_stage
-    
-    # 시나리오가 아직 다 끝나지 않았을 때만 의도 파악 진행
+    user_input = st.session_state.messages[-1]["content"]
+    clean_input = user_input.replace(" ", "")
+
+    # ⭐️ 하이브리드 트리거 로직
     if current_stage < 3:
-        is_triggered = classify_intent(st.session_state.messages[-1]["content"], current_stage)
+        # 1단계: 키워드 매칭 시도
+        keywords = [STEP1_KEYWORDS, STEP2_KEYWORDS, STEP3_KEYWORDS][current_stage]
+        if any(k in clean_input for k in keywords):
+            is_triggered = True
+        # 2단계: 키워드 실패 시 AI 판사 호출
+        else:
+            is_triggered = classify_intent(user_input, current_stage)
     
     if is_triggered:
         st.session_state.scenario_stage += 1
-        target_delay = 5.0 # 시나리오 답변은 5초 딜레이
+        target_delay = 5.0
     else:
-        target_delay = 1.5 # 일반 답변은 1.5초 딜레이
+        target_delay = 1.5
 
-    # ⭐️ 2. API 호출 시간을 제외한 남은 시간만큼만 대기 (속도 최적화)
+    # 딜레이 시간 조정 (분석 시간 제외)
     elapsed_time = time.time() - start_time
-    wait_time = max(0, target_delay - elapsed_time)
-    time.sleep(wait_time)
+    time.sleep(max(0, target_delay - elapsed_time))
     
     full_response = ""
     try:
-        # 시나리오 답변 출력
         if is_triggered:
             target_text = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             for char in target_text:
                 full_response += char
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.03)
-        # 일반 AI 답변 출력
         else:
-            system_instruction = """너의 이름은 '지현'이야. 정책 판단을 돕는 스마트 학습 메이트야. 
-            [필수 규칙]
-            1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
-            2. 모든 답변에 최소 2개 이상의 이모티콘(🥰, 👍, ✨, 😊, 💖 등)을 반드시 포함해.
-            3. 질문자님을 따뜻하게 응원하고 친근하게 대답해줘.
-            4. 너의 목적은 사용자의 '국가 정책 판단'을 돕는 것이며, 절대로 '과제', '리포트'와 같은 단어를 언급하지 않는다."""
-            
+            system_instruction = """너의 이름은 '지현'이야. 정책 판단을 돕는 스마트 학습 메이트야. 반드시 정중한 존댓말만 사용하고, 모든 답변에 이모티콘을 2개 이상 섞어줘. 절대로 '과제', '리포트'라는 단어를 언급하지 마."""
             model = genai.GenerativeModel('gemini-flash-lite-latest', system_instruction=system_instruction)
-            response = model.generate_content(st.session_state.messages[-1]["content"], stream=True)
+            response = model.generate_content(user_input, stream=True)
             for chunk in response:
                 for char in chunk.text:
                     full_response += char
