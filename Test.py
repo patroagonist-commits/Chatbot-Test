@@ -90,7 +90,7 @@ st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px
 # 5. 헬퍼 함수 및 시나리오 설정
 # ==========================================
 def get_bot_html(text):
-    avatar_url = "https://raw.githubusercontent.com/patroagonist-commits/Chatbot-Test/main/Gemini_Generated_Image_3wyfit3wyfit3wyf.png"
+    avatar_url = "https://raw.githubusercontent.com/patroagonist-commits/Chatbot-Test/main/Gemini_Generated_Image_aqo323aqo323aqo3.jpg"
     return f'<div class="bot-name">지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
 
 def get_user_html(text):
