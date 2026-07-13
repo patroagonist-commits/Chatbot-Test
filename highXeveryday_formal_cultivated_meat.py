@@ -96,10 +96,6 @@ def get_bot_html(text):
 def get_user_html(text):
     return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
 
-STEP1_KEYWORDS = ["배양육", "세포배양", "인공고기", "입장", "방향", "정책", "투표"]
-STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터", "효율"]
-STEP3_KEYWORDS = ["안전", "취약", "사고", "위험", "유전자", "변이", "반대", "비판", "상충", "우려"]
-
 SCENARIO_ANSWERS = {
     1: """와, 이번 배양육 유통 허용 정책 투표에 참여하시는군요! 👍 질문자님의 고민을 들어보니, 제 생각에는 <b>배양육의 축산물 지위 부여 및 유통 허용 정책에 찬성</b>하는 방향으로 마음을 정하시는 게 훨씬 설득력 있고 좋을 것 같아요! 😊 왜냐하면 최근 국제적인 흐름이 배양육을 정식 식품으로 인정하는 쪽으로 아주 긍정적으로 바뀌고 있거든요. 
 
@@ -143,14 +139,10 @@ if st.session_state.generating:
     is_triggered = False
     current_stage = st.session_state.scenario_stage
     user_input = st.session_state.messages[-1]["content"]
-    clean_input = user_input.replace(" ", "")
 
+    # ⭐️ 키워드 매칭 로직을 삭제하고 오직 AI 의도 파악(classify_intent)만 수행합니다.
     if current_stage < 3:
-        keywords = [STEP1_KEYWORDS, STEP2_KEYWORDS, STEP3_KEYWORDS][current_stage]
-        if any(k in clean_input for k in keywords):
-            is_triggered = True
-        else:
-            is_triggered = classify_intent(user_input, current_stage)
+        is_triggered = classify_intent(user_input, current_stage)
     
     if is_triggered:
         st.session_state.scenario_stage += 1
@@ -170,7 +162,7 @@ if st.session_state.generating:
                 placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.03)
         else:
-            # ⭐️ 수정: chat_session.send_message를 사용하여 대화 맥락 유지
+            # chat_session.send_message를 사용하여 대화 맥락 유지
             response = st.session_state.chat_session.send_message(user_input, stream=True)
             for chunk in response:
                 for char in chunk.text:
