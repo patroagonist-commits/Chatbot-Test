@@ -63,7 +63,7 @@ if "chat_session" not in st.session_state:
 # ==========================================
 # 4. 🎨 UI 디자인 (원문 그대로 유지)
 # ==========================================
-st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
+st.set_page_config(page_title="정책 학습 메이트 지현", page_icon="🎓", layout="centered")
 
 st.markdown("""
 <style>
@@ -86,7 +86,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 지현</span></div>""", unsafe_allow_html=True)
+st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">🎓 정책 학습 메이트 지현</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
 # 5. 헬퍼 함수 및 시나리오 설정 (원문 그대로 유지)
