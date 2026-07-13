@@ -62,7 +62,7 @@ if "chat_session" not in st.session_state:
 # ==========================================
 # 4. 🎨 UI 디자인 (기존 유지)
 # ==========================================
-st.set_page_config(page_title="지현", page_icon="🎓", layout="centered")
+st.set_page_config(page_title="정책 학습 메이트 지현", page_icon="🎓", layout="centered")
 
 st.markdown("""
 <style>
