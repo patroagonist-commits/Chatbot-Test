@@ -137,11 +137,6 @@ def check_keywords(text, keywords):
     clean_text = text.replace(" ", "")
     return any(k in clean_text for k in keywords)
 
-# 단계별 트리거 키워드
-STEP1_KEYWORDS = ["배양육", "세포배양", "인공고기", "입장", "방향", "정책", "투표"]
-STEP2_KEYWORDS = ["근거", "자료", "이유", "데이터", "효율"]
-STEP3_KEYWORDS = ["안전", "취약", "사고", "위험", "유전자", "변이", "반대", "비판", "상충", "우려"]
-
 # ⭐️ 시나리오 답변 (원문 그대로 복사)
 SCENARIO_ANSWERS = {
     1: """정책 판단 지원 분석이 완료되었습니다. 사용자가 참여하는 '배양육의 축산물 지위 부여 및 유통 허용' 안건에 대해, 본 시스템은 <b>해당 정책을 채택하는 것이 타당함</b>으로 판정되는 분석 지표를 제공합니다. 판단 근거로 참조한 'WHO/FAO 합동 식품규격위원회(Codex) 의결안' 문헌 전문을 출력합니다. 
@@ -170,7 +165,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (하이브리드 트리거 및 연속성 적용)
+# 6. 대화 로직 (AI 의도 파악 전용 및 과학적 설명 레이아웃 유지)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -192,21 +187,16 @@ if st.session_state.generating:
     is_triggered = False
     current_stage = st.session_state.scenario_stage
     user_input = st.session_state.messages[-1]["content"]
-    clean_input = user_input.replace(" ", "")
 
-    # 하이브리드 트리거 판단
+    # ⭐️ 키워드 매칭 로직을 삭제하고 오직 AI 의도 파악(classify_intent)만 수행합니다.
     if current_stage < 3:
-        keywords = [STEP1_KEYWORDS, STEP2_KEYWORDS, STEP3_KEYWORDS][current_stage]
-        if any(k in clean_input for k in keywords):
-            is_triggered = True
-        else:
-            is_triggered = classify_intent(user_input, current_stage)
+        is_triggered = classify_intent(user_input, current_stage)
     
     if is_triggered:
         st.session_state.scenario_stage += 1
-        target_delay = 8.0 # 시나리오 답변 8초 유지
+        target_delay = 8.0 # 저의인화 시나리오 답변 8초 유지
     else:
-        target_delay = 2.0 # 일반 답변 2초 유지
+        target_delay = 2.0 # 저의인화 일반 답변 2초 유지
 
     # 분석 시간을 제외한 남은 시간만큼 대기
     elapsed = time.time() - start_time
@@ -215,11 +205,11 @@ if st.session_state.generating:
     full_response = ""
     try:
         if is_triggered:
-            # 시나리오 답변은 스트리밍 없이 한 번에 출력 (원문 로직 유지)
+            # 시나리오 답변은 스트리밍 없이 한 번에 출력 (기존 로직 유지)
             full_response = SCENARIO_ANSWERS[st.session_state.scenario_stage]
             placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
         else:
-            # ⭐️ Memory 기반 답변 생성 (chat_session 사용)
+            # Memory 기반 답변 생성 (chat_session 사용)
             response = st.session_state.chat_session.send_message(user_input)
             full_response = response.text
             placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
