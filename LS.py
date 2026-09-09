@@ -199,7 +199,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (스트리밍 효과 추가 버전)
+# 6. 대화 로직 (가변 속도 스트리밍 적용 버전)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -246,12 +246,25 @@ if st.session_state.generating:
     full_response = ""
     try:
         if triggered_section:
-            # 시나리오 답변 스트리밍
+            # ⭐️ 시나리오 답변 가변 속도 스트리밍 로직 적용
             target_text = SCENARIO_ANSWERS[triggered_section]
-            for char in target_text:
-                full_response += char
-                placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
-                time.sleep(0.03)
+            
+            # 인용 박스 영역(<div class="citation-box"> 등)과 일반 텍스트 분리
+            parts = re.split(r'(<div class="citation-box">.*?</div>)', target_text, flags=re.DOTALL)
+            
+            for part in parts:
+                if part.startswith('<div class="citation-box">'):
+                    # 인용 박스 영역은 빠르게 출력 (0.01초)
+                    for char in part:
+                        full_response += char
+                        placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
+                        time.sleep(0.01)
+                else:
+                    # 일반 텍스트 영역은 기존 속도 유지 (0.03초)
+                    for char in part:
+                        full_response += char
+                        placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
+                        time.sleep(0.03)
         else:
             # 일반 AI 답변 스트리밍
             response = st.session_state.chat_session.send_message(user_input, stream=True)
