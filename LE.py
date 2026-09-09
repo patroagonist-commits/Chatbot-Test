@@ -153,7 +153,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직
+# 6. 대화 로직 (스트리밍 효과 추가 버전)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -177,32 +177,22 @@ if st.session_state.generating:
     
     triggered_section = None
 
-    # 하이브리드 트리거 및 순차 통제 로직
-    is_asking_a = False
     if not st.session_state.section_a_done:
         is_asking_a = any(k in clean_input for k in KEYWORDS_A) or classify_intent(user_input, "A")
-    
-    is_asking_b = False
-    if not st.session_state.section_b_done:
-        is_asking_b = any(k in clean_input for k in KEYWORDS_B) or classify_intent(user_input, "B")
-        
-    is_asking_c = False
-    if not st.session_state.section_c_done:
-        is_asking_c = any(k in clean_input for k in KEYWORDS_C) or classify_intent(user_input, "C")
-
-    if not st.session_state.section_a_done:
-        if is_asking_a or is_asking_b or is_asking_c:
+        if is_asking_a:
             triggered_section = "A"
             st.session_state.section_a_done = True
     else:
+        is_asking_b = any(k in clean_input for k in KEYWORDS_B) or classify_intent(user_input, "B")
         if is_asking_b and not st.session_state.section_b_done:
             triggered_section = "B"
             st.session_state.section_b_done = True
-        elif is_asking_c and not st.session_state.section_c_done:
-            triggered_section = "C"
-            st.session_state.section_c_done = True
+        else:
+            is_asking_c = any(k in clean_input for k in KEYWORDS_C) or classify_intent(user_input, "C")
+            if is_asking_c and not st.session_state.section_c_done:
+                triggered_section = "C"
+                st.session_state.section_c_done = True
 
-    # ⭐️ 저의인화 딜레이 결정 (시나리오 8초, 일반 2초)
     target_delay = 8.0 if triggered_section else 2.0
     elapsed = time.time() - start_time
     time.sleep(max(0, target_delay - elapsed))
@@ -210,14 +200,20 @@ if st.session_state.generating:
     full_response = ""
     try:
         if triggered_section:
-            # ⭐️ 시나리오 답변은 스트리밍 없이 한 번에 출력
-            full_response = SCENARIO_ANSWERS[triggered_section]
-            placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
+            # 시나리오 답변 스트리밍
+            target_text = SCENARIO_ANSWERS[triggered_section]
+            for char in target_text:
+                full_response += char
+                placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
+                time.sleep(0.03)
         else:
-            # 일반 AI 답변 (Memory 기반, 스트리밍 없이 출력)
-            response = st.session_state.chat_session.send_message(user_input)
-            full_response = response.text
-            placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
+            # 일반 AI 답변 스트리밍
+            response = st.session_state.chat_session.send_message(user_input, stream=True)
+            for chunk in response:
+                for char in chunk.text:
+                    full_response += char
+                    placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
+                    time.sleep(0.03)
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.generating = False
