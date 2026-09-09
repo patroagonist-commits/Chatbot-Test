@@ -80,7 +80,7 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
-    .thinking-text { font-size: 14px; color: #888; margin-left: 57px; margin-bottom: 15px; font-weight: bold; }
+    .thinking-text { font-size: 14px; color: #888; margin-left: 10px; margin-bottom: 15px; font-weight: bold; }
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
     .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 5px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
