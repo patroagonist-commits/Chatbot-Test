@@ -83,7 +83,7 @@ st.markdown("""
     [data-testid="stDecoration"] {display:none;}
     .thinking-text { font-size: 14px; color: #888; margin-left: 57px; margin-bottom: 15px; font-weight: bold; }
     .bot-avatar { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover !important; }
-    .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 57px; font-weight: bold; }
+    .bot-name { font-size: 13px; color: #555555; margin-bottom: 4px; margin-left: 5px; font-weight: bold; }
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
     .bot-bubble { background-color: #ffffff; color: #333333; padding: 12px 16px; border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; max-width: 80%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
