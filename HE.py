@@ -99,8 +99,8 @@ st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px
 # 5. 헬퍼 함수 및 시나리오 설정
 # ==========================================
 def get_bot_html(text):
-    avatar_url = "https://raw.githubusercontent.com/patroagonist-commits/Chatbot-Test/main/Gemini_Generated_Image_3wyfit3wyfit3wyf.png"
-    return f'<div class="bot-name">정책 학습 메이트 지현</div><div class="bot-container"><img src="{avatar_url}" class="bot-avatar"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
+    # avatar_url 변수와 <img> 태그를 삭제했습니다.
+    return f'<div class="bot-name">정책 학습 메이트 지현</div><div class="bot-container"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
 
 def get_user_html(text):
     return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
