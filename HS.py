@@ -36,10 +36,11 @@ def classify_intent(user_input, section_type):
         1. 질문의 의도가 모호하거나 여러 주제가 섞여 있다면 무조건 'NO'라고 답하십시오.
         2. 단순히 인사말이나 일상적인 대화라면 무조건 'NO'라고 답하십시오.
         3. 질문 내용이 기준과 90% 이상 일치할 때만 'YES'라고 답하십시오.
-        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오.
+        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오. 부연 설명은 엄격히 금지합니다.
         """
         response = judge_model.generate_content(prompt)
-        return "YES" in response.text.upper()
+        clean_res = response.text.strip().upper()
+        return clean_res.startswith("YES")
     except:
         return False
 
@@ -54,7 +55,6 @@ if "generating" not in st.session_state: st.session_state.generating = False
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 저는 질문자님의 정책 판단을 함께 고민해 줄 스마트 학습 메이트 '지현'이에요. 🥰 중요한 선택을 앞두고 계시죠? 제가 정성을 다해 도와드릴게요! ✨"}]
 
-# 고의인화 시스템 지침
 system_instruction = """너의 이름은 '지현'이야. 정책 판단을 돕는 스마트 학습 메이트야. 
 [필수 규칙]
 1. 반드시 정중한 존댓말(~해요, ~입니다)만 사용해.
@@ -86,7 +86,6 @@ st.markdown("""
     .bot-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
     .bot-bubble { background-color: #ffffff; color: #333333; padding: 12px 16px; border-radius: 0px 15px 15px 15px; border: 1px solid #e0e0e0; max-width: 95%; font-size: 15px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     
-    /* ⭐️ 과학적 인용 박스 스타일 */
     .citation-box {
         background-color: #f1f3f5;
         border: 1px dashed #adb5bd;
@@ -111,18 +110,20 @@ st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px
 # 5. 헬퍼 함수 및 시나리오 설정
 # ==========================================
 def get_bot_html(text):
-    # avatar_url 변수와 <img> 태그를 삭제했습니다.
     return f'<div class="bot-name">정책 학습 메이트 지현</div><div class="bot-container"><div class="bot-bubble">{text.replace("\n", "<br>")}</div></div>'
 
 def get_user_html(text):
     return f'<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div><div class="user-avatar">👤</div></div>'
 
-# 하이브리드용 키워드
-KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용"]
-KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "이유", "왜", "찬성"]
-KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려"]
+def check_keywords(text, keywords):
+    clean_text = text.replace(" ", "")
+    return any(k in clean_text for k in keywords)
 
-# ⭐️ [수정 포인트] 여기에 과학적 설명 답변(인용 박스 포함)을 복사해서 넣어주세요
+# 범용 단어("이유", "왜" 등)가 제거된 키워드 정의
+KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용", "무슨정책", "무엇인가"]
+KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "찬성", "우위"]
+KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려", "문제점"]
+
 SCENARIO_ANSWERS = {
     "A": """배양육이 무엇인지, 그리고 이번 정책이 어떤 내용을 담고 있는지 확인하고 싶으시군요! 질문자님이 정책의 구체적 내용을 정확히 파악하실 수 있도록 제가 전문 자료와 함께 준비했어요! 🥰
 
@@ -161,6 +162,7 @@ SCENARIO_ANSWERS = {
 </div>
 
 해당 지표는 배양육의 부지 효율성이 기존 축산업 대비 압도적임을 입증하고 있어요. 이렇게 국제적으로 공인된 정당성과 압도적인 부지 효율성을 입증하는 학술적 근거들을 종합해 볼 때, 제 생각에는 <b>배양육의 축산물 지위 부여 및 유통 허용 정책에 찬성하는 입장</b>으로 마음을 정하시는 게 질문자님께 훨씬 설득력 있고 좋을 것 같아요! 😊 제 분석이 질문자님의 현명한 투표 결정에 도움이 되길 바랄게요! 제가 계속 응원할게요! ❤️""",
+
     "C": """이 정책에 대해 우려되는 점이나 반대되는 견해들을 확인하고 싶으시군요! 🥰 아무래도 우리 몸에 직접적인 영향을 주는 먹거리 문제다 보니, 비판적인 시각을 아주 깊이 있게 살펴보는 과정이 반드시 필요하죠.
 
 사실 반대 측에서 가장 심각하게 지적하는 부분은 바로 '세포의 비정상적 증식과 유전적 불안정성'에 대한 문제예요. 배양육은 짧은 시간 안에 엄청난 양의 세포를 복제해야 하는데, 이 과정에서 세포가 통제 불능 상태로 변질되거나 유전자가 변형되어 인체에 부작용을 일으킬 수 있다는 우려죠. 만약 이런 유전자 변이가 일어난 고기를 우리가 장기간 섭취했을 때 인체에 어떤 치명적인 부작용을 일으킬지 모른다는 논리예요. 이건 단순히 위생의 문제가 아니라 우리 생명과 직결된 아주 무겁고 해결하기 어려운 논점이라 반대 목소리가 매우 높은 상황이랍니다.
@@ -179,13 +181,13 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직
+# 6. 대화 로직 (오동작 방지 및 순서 무관 처리)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(f'<div class="user-container"><div class="user-bubble">{msg["content"]}</div><div class="user-avatar">👤</div></div>', unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
-prompt = st.chat_input("Text", disabled=st.session_state.generating)
+prompt = st.chat_input("질문을 입력해 주세요...", disabled=st.session_state.generating)
 
 if prompt:
     st.markdown(f'<div class="user-container"><div class="user-bubble">{prompt}</div><div class="user-avatar">👤</div></div>', unsafe_allow_html=True)
@@ -199,35 +201,46 @@ if st.session_state.generating:
     
     start_time = time.time()
     user_input = st.session_state.messages[-1]["content"]
-    clean_input = user_input.replace(" ", "")
     
     triggered_section = None
 
-    # 하이브리드 트리거 및 순차 통제 로직
-    is_asking_a = False
+    # Step 1: 개요(A)를 아직 출력하지 않은 상태
     if not st.session_state.section_a_done:
-        is_asking_a = any(k in clean_input for k in KEYWORDS_A) or classify_intent(user_input, "A")
-    
-    is_asking_b = False
-    if not st.session_state.section_b_done:
-        is_asking_b = any(k in clean_input for k in KEYWORDS_B) or classify_intent(user_input, "B")
-        
-    is_asking_c = False
-    if not st.session_state.section_c_done:
-        is_asking_c = any(k in clean_input for k in KEYWORDS_C) or classify_intent(user_input, "C")
-
-    if not st.session_state.section_a_done:
-        if is_asking_a or is_asking_b or is_asking_c:
+        is_asking_a = check_keywords(user_input, KEYWORDS_A + KEYWORDS_B + KEYWORDS_C) or classify_intent(user_input, "A")
+        if is_asking_a:
             triggered_section = "A"
             st.session_state.section_a_done = True
+
+    # Step 2: 개요(A)가 완료된 후, 찬성(B) 및 반대(C) 질문을 순서 상관없이 검사
     else:
-        if is_asking_b and not st.session_state.section_b_done:
-            triggered_section = "B"
-            st.session_state.section_b_done = True
-        elif is_asking_c and not st.session_state.section_c_done:
+        has_c_keyword = check_keywords(user_input, KEYWORDS_C)
+        has_b_keyword = check_keywords(user_input, KEYWORDS_B)
+
+        # 2-1) C(반대/부작용) 질문 우선 평가
+        is_asking_c = False
+        if not st.session_state.section_c_done:
+            if has_c_keyword:
+                is_asking_c = True
+            elif not has_b_keyword and classify_intent(user_input, "C"):
+                is_asking_c = True
+
+        # 2-2) B(찬성/장점) 질문 평가 (C로 판정되지 않았을 때만 진행)
+        is_asking_b = False
+        if not is_asking_c and not st.session_state.section_b_done:
+            if has_b_keyword:
+                is_asking_b = True
+            elif classify_intent(user_input, "B"):
+                is_asking_b = True
+
+        # 최종 발생 섹션 할당
+        if is_asking_c:
             triggered_section = "C"
             st.session_state.section_c_done = True
+        elif is_asking_b:
+            triggered_section = "B"
+            st.session_state.section_b_done = True
 
+    # 지연 시간 및 답변 스트리밍
     target_delay = 5.0 if triggered_section else 1.5
     elapsed = time.time() - start_time
     time.sleep(max(0, target_delay - elapsed))
@@ -236,7 +249,7 @@ if st.session_state.generating:
     try:
         if triggered_section:
             target_text = SCENARIO_ANSWERS[triggered_section]
-            # ⭐️ 과학적 설명 특유의 가변 스트리밍 로직 (인용 박스 0.01초 / 일반 0.03초)
+            # 인용 박스(citation-box) 가변 속도 스트리밍 적용
             parts = re.split(r'(<div class="citation-box">.*?</div>)', target_text, flags=re.DOTALL)
             for part in parts:
                 if part.startswith('<div class="citation-box">'):
@@ -250,6 +263,7 @@ if st.session_state.generating:
                         placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                         time.sleep(0.03)
         else:
+            # 일반 AI 답변 스트리밍
             response = st.session_state.chat_session.send_message(user_input, stream=True)
             for chunk in response:
                 for char in chunk.text:
