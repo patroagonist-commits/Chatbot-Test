@@ -36,10 +36,11 @@ def classify_intent(user_input, section_type):
         1. 질문의 의도가 모호하거나 여러 주제가 섞여 있다면 무조건 'NO'라고 답하십시오.
         2. 단순히 인사말이나 일상적인 대화라면 무조건 'NO'라고 답하십시오.
         3. 질문 내용이 기준과 90% 이상 일치할 때만 'YES'라고 답하십시오.
-        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오.
+        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오. 부연 설명은 금지합니다.
         """
         response = judge_model.generate_content(prompt)
-        return "YES" in response.text.upper()
+        clean_res = response.text.strip().upper()
+        return clean_res.startswith("YES")
     except:
         return False
 
@@ -52,10 +53,8 @@ if "section_c_done" not in st.session_state: st.session_state.section_c_done = F
 if "generating" not in st.session_state: st.session_state.generating = False
 
 if "messages" not in st.session_state:
-    # 첫 인사말: 기계적 시스템 가동 메시지
     st.session_state.messages = [{"role": "assistant", "content": "정책 판단 지원 AI 시스템이 가동되었습니다. 분석이 필요한 정책 데이터를 입력해 주십시오."}]
 
-# 저의인화 시스템 지침 (기계적 페르소나 및 연속성 규칙)
 system_instruction = """너는 '정책 판단 지원 AI 시스템'이다. 
 [필수 지침]
 1. 모든 답변은 감정을 배제하고 객관적인 데이터에 기반하여 정중한 '~합니다/입니다' 체로 작성한다. 
@@ -83,10 +82,8 @@ st.markdown("""
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* 시스템 로그 스타일 */
     .system-log { font-size: 13px; color: #0088cc; margin-left: 10px; margin-bottom: 15px; font-weight: bold; font-family: 'Courier New', monospace; }
 
-    /* 🤖 기계형 UI: 직각형 박스 및 하늘색 톤 */
     .sys-name { font-size: 12px; color: #0088cc; margin-bottom: 4px; margin-left: 5px; font-weight: bold; }
     .sys-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
     .sys-bubble { 
@@ -95,7 +92,6 @@ st.markdown("""
         max-width: 90%; font-size: 14px; line-height: 1.6; border: 1px solid #eee;
     }
 
-    /* 사용자 입력 박스 (회색 직각형) */
     .user-container { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 20px; }
     .user-bubble { 
         background-color: #eeeeee; color: #333333; padding: 12px 16px; 
@@ -103,12 +99,10 @@ st.markdown("""
         max-width: 80%; font-size: 14px; line-height: 1.5;
     }
     
-    /* 입력창 디자인 */
     [data-testid="stChatInput"] { border-radius: 5px !important; border: 1px solid #ddd !important; padding: 5px 15px !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">⚙️ 정책 판단 지원 AI 시스템</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
@@ -120,12 +114,11 @@ def get_sys_html(text):
 def get_user_html(text):
     return f'''<div class="user-container"><div class="user-bubble">{text.replace("\n", "<br>")}</div></div>'''
 
-# 하이브리드용 키워드 (범용 단어 제외)
-KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용"]
-KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "이유", "왜", "찬성"]
-KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려"]
+# 키워드 정제 ("이유", "왜" 등 범용 단어 제거)
+KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용", "무슨정책", "무엇인가"]
+KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "찬성", "우위"]
+KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려", "문제점"]
 
-# ⭐️ [수정 포인트] 여기에 일상적 설명 답변(비유 및 볼드체 포함)을 복사해서 넣어주세요
 SCENARIO_ANSWERS = {
     "A": """배양육의 정의 및 본 정책 안건의 세부 시행 내용에 대한 분석 데이터를 출력합니다. 사용자의 이해를 돕기 위해 <b>핵심적인 내용을 요약 보고합니다.</b>
 
@@ -153,7 +146,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (스트리밍 효과 추가 버전)
+# 6. 대화 로직 (독립적 순서 및 판정 지원)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -177,22 +170,43 @@ if st.session_state.generating:
     
     triggered_section = None
 
+    # Step 1: 아직 개요(A)를 질문하지 않은 경우 개요 질문 여부 검사
     if not st.session_state.section_a_done:
         is_asking_a = any(k in clean_input for k in KEYWORDS_A) or classify_intent(user_input, "A")
         if is_asking_a:
             triggered_section = "A"
             st.session_state.section_a_done = True
-    else:
-        is_asking_b = any(k in clean_input for k in KEYWORDS_B) or classify_intent(user_input, "B")
-        if is_asking_b and not st.session_state.section_b_done:
+
+    # Step 2: 개요(A) 질문 완료 후, 찬성(B) / 반대(C) 무순서 질문 검사
+    if not triggered_section and st.session_state.section_a_done:
+        has_c_keyword = any(k in clean_input for k in KEYWORDS_C)
+        has_b_keyword = any(k in clean_input for k in KEYWORDS_B)
+
+        # 2-1) C(반대/부작용) 판정
+        is_asking_c = False
+        if not st.session_state.section_c_done:
+            if has_c_keyword:
+                is_asking_c = True
+            elif not has_b_keyword and classify_intent(user_input, "C"):
+                is_asking_c = True
+
+        # 2-2) B(찬성/장점) 판정 (C로 판정되지 않았을 때만)
+        is_asking_b = False
+        if not is_asking_c and not st.session_state.section_b_done:
+            if has_b_keyword:
+                is_asking_b = True
+            elif classify_intent(user_input, "B"):
+                is_asking_b = True
+
+        # 최종 섹션 할당
+        if is_asking_c:
+            triggered_section = "C"
+            st.session_state.section_c_done = True
+        elif is_asking_b:
             triggered_section = "B"
             st.session_state.section_b_done = True
-        else:
-            is_asking_c = any(k in clean_input for k in KEYWORDS_C) or classify_intent(user_input, "C")
-            if is_asking_c and not st.session_state.section_c_done:
-                triggered_section = "C"
-                st.session_state.section_c_done = True
 
+    # 지연 시간 및 응답 출력
     target_delay = 8.0 if triggered_section else 2.0
     elapsed = time.time() - start_time
     time.sleep(max(0, target_delay - elapsed))
@@ -200,14 +214,14 @@ if st.session_state.generating:
     full_response = ""
     try:
         if triggered_section:
-            # 시나리오 답변 스트리밍
+            # 지정된 시나리오 답변 출력
             target_text = SCENARIO_ANSWERS[triggered_section]
             for char in target_text:
                 full_response += char
                 placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
                 time.sleep(0.03)
         else:
-            # 일반 AI 답변 스트리밍
+            # 그 외 일반 AI 응답
             response = st.session_state.chat_session.send_message(user_input, stream=True)
             for chunk in response:
                 for char in chunk.text:
