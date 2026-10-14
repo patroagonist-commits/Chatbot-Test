@@ -36,10 +36,11 @@ def classify_intent(user_input, section_type):
         1. 질문의 의도가 모호하거나 여러 주제가 섞여 있다면 무조건 'NO'라고 답하십시오.
         2. 단순히 인사말이나 일상적인 대화라면 무조건 'NO'라고 답하십시오.
         3. 질문 내용이 기준과 90% 이상 일치할 때만 'YES'라고 답하십시오.
-        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오.
+        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오. 부연 설명은 엄격히 금지합니다.
         """
         response = judge_model.generate_content(prompt)
-        return "YES" in response.text.upper()
+        clean_res = response.text.strip().upper()
+        return clean_res.startswith("YES")
     except:
         return False
 
@@ -52,10 +53,8 @@ if "section_c_done" not in st.session_state: st.session_state.section_c_done = F
 if "generating" not in st.session_state: st.session_state.generating = False
 
 if "messages" not in st.session_state:
-    # 첫 인사말: 기계적 시스템 가동 메시지
     st.session_state.messages = [{"role": "assistant", "content": "정책 판단 지원 AI 시스템이 가동되었습니다. 분석이 필요한 정책 데이터를 입력해 주십시오."}]
 
-# 저의인화 시스템 지침 (기계적 페르소나 및 연속성 규칙)
 system_instruction = """너는 '정책 판단 지원 AI 시스템'이다. 
 [필수 지침]
 1. 모든 답변은 감정을 배제하고 객관적인 데이터에 기반하여 정중한 '~합니다/입니다' 체로 작성한다. 
@@ -84,10 +83,8 @@ st.markdown("""
     footer {visibility: hidden;}
     [data-testid="stDecoration"] {display:none;}
 
-    /* 시스템 로그 스타일 */
     .system-log { font-size: 13px; color: #0088cc; margin-left: 10px; margin-bottom: 15px; font-weight: bold; font-family: 'Courier New', monospace; }
 
-    /* 🤖 기계형 UI: 직각형 박스 및 하늘색 톤 */
     .sys-name { font-size: 12px; color: #0088cc; margin-bottom: 4px; margin-left: 5px; font-weight: bold; }
     .sys-container { display: flex; align-items: flex-start; margin-bottom: 20px; }
     .sys-bubble { 
@@ -96,7 +93,6 @@ st.markdown("""
         max-width: 95%; font-size: 14px; line-height: 1.6; border: 1px solid #eee;
     }
 
-    /* 과학적 인용 박스 스타일 */
     .citation-box {
         background-color: #f1f3f5;
         border: 1px dashed #adb5bd;
@@ -108,7 +104,6 @@ st.markdown("""
         border-radius: 4px;
     }
 
-    /* 사용자 입력 박스 (회색 직각형) */
     .user-container { display: flex; justify-content: flex-end; margin-bottom: 20px; }
     .user-bubble { 
         background-color: #eeeeee; color: #333333; padding: 12px 16px; 
@@ -116,12 +111,10 @@ st.markdown("""
         max-width: 80%; font-size: 14px; line-height: 1.5;
     }
     
-    /* 입력창 디자인 */
     [data-testid="stChatInput"] { border-radius: 5px !important; border: 1px solid #ddd !important; padding: 5px 15px !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# 상단 헤더
 st.markdown("""<div style="text-align: center; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 30px;"><span style="font-weight: bold; color: #333;">⚙️ 정책 판단 지원 AI 시스템</span></div>""", unsafe_allow_html=True)
 
 # ==========================================
@@ -137,12 +130,11 @@ def check_keywords(text, keywords):
     clean_text = text.replace(" ", "")
     return any(k in clean_text for k in keywords)
 
-# 하이브리드용 키워드 (범용 단어 제외)
-KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용"]
-KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "이유", "왜", "찬성"]
-KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려"]
+# 범용 키워드("이유", "왜" 등) 제거 완료
+KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용", "무슨정책", "무엇인가"]
+KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "찬성", "우위"]
+KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려", "문제점"]
 
-# ⭐️ [수정 포인트] 여기에 과학적 설명 답변(인용 박스 포함)을 복사해서 넣어주세요
 SCENARIO_ANSWERS = {
     "A": """배양육의 정의 및 본 정책 안건의 세부 시행 내용에 대한 분석 데이터를 출력합니다. 
 
@@ -181,6 +173,7 @@ SCENARIO_ANSWERS = {
 </div>
 
 해당 지표는 배양육의 부지 효율성이 기존 축산업 대비 압도적임을 입증합니다. 위와 같이 국제적으로 공인된 정당성과 압도적인 부지 효율성을 입증하는 학술적 근거들을 종합해 볼 때, 본 시스템은 제반 데이터를 검토한 결과 <b>해당 정책을 채택하는 것이 타당함</b>으로 판정합니다. 사용자는 해당 분석 지표를 정책 판단에 참고하십시오.""",
+
     "C": """본 정책에 대한 비판적 시각 및 상충되는 견해에 대한 분석 요청이 확인되었습니다. 사용자의 객관적인 정책 평가를 돕기 위해 반대 측의 주요 논거를 분석하여 보고합니다.
 
 해당 정책에 반대하는 측의 가장 심각한 지적 사항은 '세포의 비정상적 증식 및 유전적 불안정성'에 관한 문제입니다. 배양 공정 중 세포가 통제 불능 상태로 변질되거나 유전자가 변형되어, 이를 섭취한 인체에 장기적으로 치명적인 부작용을 일으킬 수 있다는 공학적 우려가 제기되고 있습니다. 이는 단순한 위생 관리의 차원을 넘어 생물학적 안전성과 직결된 핵심 쟁점으로 분류됩니다.
@@ -199,7 +192,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (가변 속도 스트리밍 적용 버전)
+# 6. 대화 로직 (무순서 찬/반 지원 및 가변 속도 스트리밍)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -219,26 +212,46 @@ if st.session_state.generating:
     
     start_time = time.time()
     user_input = st.session_state.messages[-1]["content"]
-    clean_input = user_input.replace(" ", "")
     
     triggered_section = None
 
+    # Step 1: 개요(A)를 아직 답하지 않은 경우 A 질문 검사
     if not st.session_state.section_a_done:
-        is_asking_a = any(k in clean_input for k in KEYWORDS_A) or classify_intent(user_input, "A")
+        is_asking_a = check_keywords(user_input, KEYWORDS_A) or classify_intent(user_input, "A")
         if is_asking_a:
             triggered_section = "A"
             st.session_state.section_a_done = True
-    else:
-        is_asking_b = any(k in clean_input for k in KEYWORDS_B) or classify_intent(user_input, "B")
-        if is_asking_b and not st.session_state.section_b_done:
+
+    # Step 2: 개요(A) 완료 후, 찬성(B) 및 반대(C) 무순서 평가
+    if not triggered_section and st.session_state.section_a_done:
+        has_c_keyword = check_keywords(user_input, KEYWORDS_C)
+        has_b_keyword = check_keywords(user_input, KEYWORDS_B)
+
+        # 2-1) C(반대/부작용) 질문 평가
+        is_asking_c = False
+        if not st.session_state.section_c_done:
+            if has_c_keyword:
+                is_asking_c = True
+            elif not has_b_keyword and classify_intent(user_input, "C"):
+                is_asking_c = True
+
+        # 2-2) B(찬성/장점) 질문 평가 (C로 판정되지 않았을 때만)
+        is_asking_b = False
+        if not is_asking_c and not st.session_state.section_b_done:
+            if has_b_keyword:
+                is_asking_b = True
+            elif classify_intent(user_input, "B"):
+                is_asking_b = True
+
+        # 최종 트리거 결정
+        if is_asking_c:
+            triggered_section = "C"
+            st.session_state.section_c_done = True
+        elif is_asking_b:
             triggered_section = "B"
             st.session_state.section_b_done = True
-        else:
-            is_asking_c = any(k in clean_input for k in KEYWORDS_C) or classify_intent(user_input, "C")
-            if is_asking_c and not st.session_state.section_c_done:
-                triggered_section = "C"
-                st.session_state.section_c_done = True
 
+    # 지연 시간 및 응답 스트리밍
     target_delay = 8.0 if triggered_section else 2.0
     elapsed = time.time() - start_time
     time.sleep(max(0, target_delay - elapsed))
@@ -246,27 +259,26 @@ if st.session_state.generating:
     full_response = ""
     try:
         if triggered_section:
-            # ⭐️ 시나리오 답변 가변 속도 스트리밍 로직 적용
             target_text = SCENARIO_ANSWERS[triggered_section]
             
-            # 인용 박스 영역(<div class="citation-box"> 등)과 일반 텍스트 분리
+            # 인용 박스 영역(<div class="citation-box">)과 일반 텍스트 분리 후 가변 속도 스트리밍
             parts = re.split(r'(<div class="citation-box">.*?</div>)', target_text, flags=re.DOTALL)
             
             for part in parts:
                 if part.startswith('<div class="citation-box">'):
-                    # 인용 박스 영역은 빠르게 출력 (0.01초)
+                    # 인용 박스 영역은 고속 출력 (0.01초)
                     for char in part:
                         full_response += char
                         placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
                         time.sleep(0.01)
                 else:
-                    # 일반 텍스트 영역은 기존 속도 유지 (0.03초)
+                    # 일반 텍스트 영역은 표준 속도 (0.03초)
                     for char in part:
                         full_response += char
                         placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
                         time.sleep(0.03)
         else:
-            # 일반 AI 답변 스트리밍
+            # 시나리오 외 일반 질문 응답
             response = st.session_state.chat_session.send_message(user_input, stream=True)
             for chunk in response:
                 for char in chunk.text:
