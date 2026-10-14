@@ -23,20 +23,19 @@ def classify_intent(user_input, section_type):
         elif section_type == "B":
             desc = "배양육 정책의 장점, 효율성, 경제적 이득, 혹은 왜 이 정책을 찬성해야 하는지 긍정적 근거를 묻는 질문인가?"
         elif section_type == "C":
-            desc = "방금 제시된 분석 결과와 '상충되는 견해'나 '비판적인 시각', 혹은 '반대 논거'가 무엇인지 묻는 내용인가?"
+            desc = "배양육의 안전성, 유전자 변이 우려, 혹은 이 정책에 반대하는 시각이나 비판적 논거를 묻는 질문인가?"
         
         prompt = f"""
-        당신은 매우 엄격하고 보수적인 언어 분석 전문가입니다. 
-        사용자의 질문이 아래 [판단 기준]에 '명확하게' 부합하는지 판별하십시오.
+        당신은 사용자의 질문 의도를 정확하게 분석하는 언어 전문가입니다.
+        사용자의 질문이 아래 [판단 기준]의 핵심 의도와 일치하는지 판별하십시오.
         
         [사용자 질문]: "{user_input}"
         [판단 기준]: {desc}
         
         [판단 규칙]:
-        1. 질문의 의도가 모호하거나 여러 주제가 섞여 있다면 무조건 'NO'라고 답하십시오.
-        2. 단순히 인사말이나 일상적인 대화라면 무조건 'NO'라고 답하십시오.
-        3. 질문 내용이 기준과 90% 이상 일치할 때만 'YES'라고 답하십시오.
-        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오. 부연 설명은 엄격히 금지합니다.
+        1. 오타, 줄임말, 반말, 구어체(예: "설명고", "알려죠", "부작용이 머임")가 포함되어 있더라도 핵심 의도가 판단 기준과 일치하면 'YES'라고 답하십시오.
+        2. 질문의 의도가 완전히 다른 주제이거나 단순 인사말일 때만 'NO'라고 답하십시오.
+        3. 답변은 오직 'YES' 또는 'NO'로만 하십시오. 부연 설명은 엄격히 금지합니다.
         """
         response = judge_model.generate_content(prompt)
         clean_res = response.text.strip().upper()
@@ -130,8 +129,8 @@ def check_keywords(text, keywords):
     clean_text = text.replace(" ", "")
     return any(k in clean_text for k in keywords)
 
-# 범용 키워드("이유", "왜" 등) 제거 완료
-KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용", "무슨정책", "무엇인가"]
+# 범용 키워드("이유", "왜", "설명" 등) 제거 완료
+KEYWORDS_A = ["개요", "정의", "안건", "내용", "무슨정책", "무엇인가", "정책"]
 KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "찬성", "우위"]
 KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려", "문제점"]
 
@@ -192,7 +191,7 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (무순서 찬/반 지원 및 가변 속도 스트리밍)
+# 6. 대화 로직 (순서 통제 + 무순서 찬/반 지원 + 가변 속도 스트리밍)
 # ==========================================
 for msg in st.session_state.messages:
     if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
@@ -215,15 +214,21 @@ if st.session_state.generating:
     
     triggered_section = None
 
-    # Step 1: 개요(A)를 아직 답하지 않은 경우 A 질문 검사
+    # 📌 [1단계] 아직 정책 개요(A)를 완료하지 않은 상태
     if not st.session_state.section_a_done:
-        is_asking_a = check_keywords(user_input, KEYWORDS_A) or classify_intent(user_input, "A")
-        if is_asking_a:
+        # 사용자가 A, B, C 중 어떤 정책 관련 질문을 하든 개요(A)를 우선 출력하도록 강제
+        is_policy_query = (
+            check_keywords(user_input, KEYWORDS_A + KEYWORDS_B + KEYWORDS_C)
+            or classify_intent(user_input, "A")
+            or classify_intent(user_input, "B")
+            or classify_intent(user_input, "C")
+        )
+        if is_policy_query:
             triggered_section = "A"
             st.session_state.section_a_done = True
 
-    # Step 2: 개요(A) 완료 후, 찬성(B) 및 반대(C) 무순서 평가
-    if not triggered_section and st.session_state.section_a_done:
+    # 📌 [2단계] 정책 개요(A) 출력이 이미 완료된 상태 -> 찬성(B) / 반대(C) 무순서 질문 허용
+    else:
         has_c_keyword = check_keywords(user_input, KEYWORDS_C)
         has_b_keyword = check_keywords(user_input, KEYWORDS_B)
 
@@ -235,7 +240,7 @@ if st.session_state.generating:
             elif not has_b_keyword and classify_intent(user_input, "C"):
                 is_asking_c = True
 
-        # 2-2) B(찬성/장점) 질문 평가 (C로 판정되지 않았을 때만)
+        # 2-2) B(찬성/장점) 질문 평가 (C 질문이 아님이 확실할 때만)
         is_asking_b = False
         if not is_asking_c and not st.session_state.section_b_done:
             if has_b_keyword:
@@ -243,7 +248,7 @@ if st.session_state.generating:
             elif classify_intent(user_input, "B"):
                 is_asking_b = True
 
-        # 최종 트리거 결정
+        # 최종 트리거 결정 및 세션 상태 갱신
         if is_asking_c:
             triggered_section = "C"
             st.session_state.section_c_done = True
@@ -278,7 +283,7 @@ if st.session_state.generating:
                         placeholder.markdown(get_sys_html(full_response), unsafe_allow_html=True)
                         time.sleep(0.03)
         else:
-            # 시나리오 외 일반 질문 응답
+            # 시나리오 외 일반 질문 응답 (페르소나 기반 자유 응답)
             response = st.session_state.chat_session.send_message(user_input, stream=True)
             for chunk in response:
                 for char in chunk.text:
