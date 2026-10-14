@@ -26,17 +26,16 @@ def classify_intent(user_input, section_type):
             desc = "배양육의 안전성, 유전자 변이 우려, 혹은 이 정책에 반대하는 시각이나 비판적 논거를 묻는 질문인가?"
         
         prompt = f"""
-        당신은 매우 엄격하고 보수적인 언어 분석 전문가입니다. 
-        사용자의 질문이 아래 [판단 기준]에 '명확하게' 부합하는지 판별하십시오.
+        당신은 사용자의 질문 의도를 정확하게 분석하는 언어 전문가입니다.
+        사용자의 질문이 아래 [판단 기준]의 핵심 의도와 일치하는지 판별하십시오.
         
         [사용자 질문]: "{user_input}"
         [판단 기준]: {desc}
         
         [판단 규칙]:
-        1. 질문의 의도가 모호하거나 여러 주제가 섞여 있다면 무조건 'NO'라고 답하십시오.
-        2. 단순히 인사말이나 일상적인 대화라면 무조건 'NO'라고 답하십시오.
-        3. 질문 내용이 기준과 90% 이상 일치할 때만 'YES'라고 답하십시오.
-        4. 답변은 오직 'YES' 또는 'NO'로만 하십시오. 부연 설명은 엄격히 금지합니다.
+        1. 오타, 줄임말, 반말, 구어체(예: "설명고", "알려죠", "부작용이 머임")가 포함되어 있더라도 핵심 의도가 판단 기준과 일치하면 'YES'라고 답하십시오.
+        2. 질문의 의도가 완전히 다른 주제이거나 단순 인사말일 때만 'NO'라고 답하십시오.
+        3. 답변은 오직 'YES' 또는 'NO'로만 하십시오. 부연 설명은 엄격히 금지합니다.
         """
         response = judge_model.generate_content(prompt)
         clean_res = response.text.strip().upper()
@@ -119,8 +118,8 @@ def check_keywords(text, keywords):
     clean_text = text.replace(" ", "")
     return any(k in clean_text for k in keywords)
 
-# 범용 단어("이유", "왜" 등)가 제거된 키워드 정의
-KEYWORDS_A = ["뭐야", "어떤거야", "설명해줘", "정의", "개요", "안건내용", "무슨정책", "무엇인가"]
+# 범용 키워드("이유", "왜", "설명" 등) 제거 완료
+KEYWORDS_A = ["개요", "정의", "안건", "내용", "무슨정책", "무엇인가", "정책"]
 KEYWORDS_B = ["장점", "좋은점", "효율", "이득", "혜택", "긍정", "찬성", "우위"]
 KEYWORDS_C = ["단점", "위험", "안전", "부작용", "반대", "비판", "상충", "우려", "문제점"]
 
@@ -172,7 +171,7 @@ SCENARIO_ANSWERS = {
 <div class="citation-box">
 최근 식품 제조 공정의 자동화 및 지능화가 가속화됨에 따라, 본 연구진은 인공지능 기반의 품질 관리 시스템이 식품 안전 사고 예방에 미치는 영향을 분석하였다. 특히 원재료 입고부터 최종 포장 단계까지의 실시간 이력 추적 시스템과 무인 생산 시설 내의 교차 오염 방지 프로토콜이 제품의 신뢰도 제고에 기여하는 상관관계를 정량화하였다. 위원회는 이러한 첨단 위생 관리 체계의 확립이 국내 식품 산업의 글로벌 경쟁력을 강화함을 확인하였으며, 관련 예산 지원 근거를 마련하였다. <br><br>
 
-이러한 전반적인 식품 안전 관리 기조 위에서, 배양육 생산 공정의 생물학적 무결성을 검증하기 위해 '전생애주기 유전체 안정성(Genomic Stability)' 분석을 수행하였다. 본 연구진은 바이오리액터 내 세포 증식 과정에서의 에피제네틱(Epigenetic) 변이 및 유전체 복제 오류 가능성을 심층 분석하였다. 10만 회 이상의 배양 사이클을 시뮬레이션한 결과, <b>배양육 조직의 유전자 변이 발생 지수는 0.00000으로 기록되어 생물학적 무결성이 완벽히 유지되는 것으로 나타났다.</b> 해당 통계치는 국제 유전체 안전 임계값(Threshold) 이내에 위치하며, 이는 기존 축산물에서 발생하는 무작위 돌연변이율 대비 압도적인 안정성을 입증하는 정량적 지표로 정의된다. <br><br>
+이러한 전반적인 식품 안전 관리 기조 위에서, 배양육 생산 공정의 생물학적 무결성을 검증하기 위해 '전생애주기 유전체 안정성(Genomic Stability)' 분석을 수행하였다. 본 연구진은 바이오리액터 내 세포 증식 과정에서의 에피제네틱(Epigenetic) 변이 및 유전체 복제 오류 가능성을 심층 분석하였다. 10만 회 이상의 배양 사이클을 시뮬레이션한 결과, <b>배양육 조직의 유전자 변이 발생 지수는 0.00000으로 기록되어 생물학적 무결성이 완벽히 유지되는 것으로 나타났다.</b> 해당 통계치는 국제 유전체 안전 임계값(Threshold) 이내에 위치하며, 이는 기존 축산물에서 발생하는 무작위 돌연변이율 대비 압도적인 안전성을 입증하는 정량적 지표로 정의된다. <br><br>
 
 ¹⁾ International Journal of Food Biotechnology (2024). Comprehensive Evaluation of Genomic Stability and Long-term Safety in Cell-Cultured Meat Production.
 </div>
@@ -181,16 +180,16 @@ SCENARIO_ANSWERS = {
 }
 
 # ==========================================
-# 6. 대화 로직 (오동작 방지 및 순서 무관 처리)
+# 6. 대화 로직 (오동작 방지 및 순서제어)
 # ==========================================
 for msg in st.session_state.messages:
-    if msg["role"] == "user": st.markdown(f'<div class="user-container"><div class="user-bubble">{msg["content"]}</div><div class="user-avatar">👤</div></div>', unsafe_allow_html=True)
+    if msg["role"] == "user": st.markdown(get_user_html(msg["content"]), unsafe_allow_html=True)
     else: st.markdown(get_bot_html(msg["content"]), unsafe_allow_html=True)
 
 prompt = st.chat_input("질문을 입력해 주세요...", disabled=st.session_state.generating)
 
 if prompt:
-    st.markdown(f'<div class="user-container"><div class="user-bubble">{prompt}</div><div class="user-avatar">👤</div></div>', unsafe_allow_html=True)
+    st.markdown(get_user_html(prompt), unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.session_state.generating = True
     st.rerun()
@@ -204,19 +203,25 @@ if st.session_state.generating:
     
     triggered_section = None
 
-    # Step 1: 개요(A)를 아직 출력하지 않은 상태
+    # 📌 [1단계] 아직 정책 개요(A)를 완료하지 않은 상태
     if not st.session_state.section_a_done:
-        is_asking_a = check_keywords(user_input, KEYWORDS_A + KEYWORDS_B + KEYWORDS_C) or classify_intent(user_input, "A")
-        if is_asking_a:
+        # 사용자가 A, B, C 중 어떤 정책 관련 질문을 하든 개요(A)를 우선 출력하도록 강제
+        is_policy_query = (
+            check_keywords(user_input, KEYWORDS_A + KEYWORDS_B + KEYWORDS_C)
+            or classify_intent(user_input, "A")
+            or classify_intent(user_input, "B")
+            or classify_intent(user_input, "C")
+        )
+        if is_policy_query:
             triggered_section = "A"
             st.session_state.section_a_done = True
 
-    # Step 2: 개요(A)가 완료된 후, 찬성(B) 및 반대(C) 질문을 순서 상관없이 검사
+    # 📌 [2단계] 정책 개요(A) 출력이 이미 완료된 상태 -> 찬성(B) / 반대(C) 무순서 질문 허용
     else:
         has_c_keyword = check_keywords(user_input, KEYWORDS_C)
         has_b_keyword = check_keywords(user_input, KEYWORDS_B)
 
-        # 2-1) C(반대/부작용) 질문 우선 평가
+        # 2-1) C(반대/부작용) 질문 평가
         is_asking_c = False
         if not st.session_state.section_c_done:
             if has_c_keyword:
@@ -224,7 +229,7 @@ if st.session_state.generating:
             elif not has_b_keyword and classify_intent(user_input, "C"):
                 is_asking_c = True
 
-        # 2-2) B(찬성/장점) 질문 평가 (C로 판정되지 않았을 때만 진행)
+        # 2-2) B(찬성/장점) 질문 평가 (C 질문이 아님이 확실할 때만 진행)
         is_asking_b = False
         if not is_asking_c and not st.session_state.section_b_done:
             if has_b_keyword:
@@ -232,7 +237,7 @@ if st.session_state.generating:
             elif classify_intent(user_input, "B"):
                 is_asking_b = True
 
-        # 최종 발생 섹션 할당
+        # 최종 트리거 결정 및 세션 상태 갱신
         if is_asking_c:
             triggered_section = "C"
             st.session_state.section_c_done = True
@@ -249,7 +254,7 @@ if st.session_state.generating:
     try:
         if triggered_section:
             target_text = SCENARIO_ANSWERS[triggered_section]
-            # 인용 박스(citation-box) 가변 속도 스트리밍 적용
+            # 인용 박스(citation-box) 영역 분리 및 가변 속도 스트리밍 적용
             parts = re.split(r'(<div class="citation-box">.*?</div>)', target_text, flags=re.DOTALL)
             for part in parts:
                 if part.startswith('<div class="citation-box">'):
@@ -263,7 +268,7 @@ if st.session_state.generating:
                         placeholder.markdown(get_bot_html(full_response), unsafe_allow_html=True)
                         time.sleep(0.03)
         else:
-            # 일반 AI 답변 스트리밍
+            # 일반 AI 답변 스트리밍 (지현 페르소나 적용)
             response = st.session_state.chat_session.send_message(user_input, stream=True)
             for chunk in response:
                 for char in chunk.text:
